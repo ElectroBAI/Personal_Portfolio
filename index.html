@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baibhab Das — Windows Terminal Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cascadia+Code:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#16c60c;--green-dim:#0ea800;--blue:#3b78ff;--cyan:#61d6d6;
+  --yellow:#f9f1a5;--red:#e74856;--purple:#b4009e;--white:#cccccc;
+  --dim:#666;--bg:#1e1e1e;--term-bg:rgba(12,12,12,0.82);
+  --border:rgba(255,255,255,0.08);--acrylic:rgba(32,32,32,0.75);
+  --titlebar:#2c2c2c;--titlebar-text:#c4c4c4;
+  --tab-active:#1e1e1e;--tab-inactive:#2d2d2d;
+  --win11-accent:#0067c0;
+}
+html,body{height:100%;overflow:hidden;font-family:'Cascadia Code','Fira Code',monospace;background:#000}
+body{
+  background:
+    radial-gradient(ellipse 120% 80% at 60% 110%,rgba(0,103,192,0.18) 0%,transparent 55%),
+    radial-gradient(ellipse 80% 60% at 0% 0%,rgba(22,198,12,0.06) 0%,transparent 50%),
+    #141414;
+  display:flex;align-items:center;justify-content:center;
+}
+.wallpaper{
+  position:fixed;inset:0;z-index:0;
+  background-image:
+    linear-gradient(rgba(0,103,192,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,103,192,0.04) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.scanlines{
+  position:fixed;inset:0;z-index:500;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px);
+}
+.wt-window{
+  position:relative;z-index:200;
+  width:min(960px,99vw);height:min(640px,97vh);
+  display:flex;flex-direction:column;
+  background:var(--acrylic);
+  backdrop-filter:blur(40px) saturate(180%) brightness(0.9);
+  -webkit-backdrop-filter:blur(40px) saturate(180%) brightness(0.9);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.5),
+    0 32px 64px rgba(0,0,0,0.8),
+    0 8px 32px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  overflow:hidden;
+}
+.titlebar{
+  height:36px;background:var(--titlebar);
+  display:flex;align-items:stretch;flex-shrink:0;
+  user-select:none;border-bottom:1px solid rgba(0,0,0,0.4);
+}
+.titlebar-tabs{display:flex;align-items:stretch;flex:1;overflow:hidden}
+.tab{
+  display:flex;align-items:center;gap:8px;padding:0 16px;font-size:12px;color:#999;
+  border-right:1px solid rgba(0,0,0,0.3);cursor:default;white-space:nowrap;min-width:160px;
+  transition:background .15s;position:relative;
+}
+.tab.active{
+  background:var(--tab-active);color:var(--white);border-top:2px solid var(--win11-accent);
+}
+.tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:var(--tab-active);}
+.tab-icon{font-size:13px}
+.tab-close{
+  margin-left:auto;width:16px;height:16px;display:flex;align-items:center;justify-content:center;
+  border-radius:3px;font-size:10px;color:#666;
+}
+.tab-close:hover{background:rgba(255,255,255,0.1);color:#ccc}
+.tab-new{
+  width:36px;display:flex;align-items:center;justify-content:center;
+  color:#666;font-size:16px;cursor:pointer;flex-shrink:0;
+}
+.tab-new:hover{background:rgba(255,255,255,0.06);color:#ccc}
+.caption-btns{display:flex;align-items:stretch;flex-shrink:0}
+.cap-btn{
+  width:46px;display:flex;align-items:center;justify-content:center;
+  color:#999;font-size:10px;cursor:pointer;transition:background .1s;
+  border:none;background:transparent;font-family:'Cascadia Code',monospace;
+}
+.cap-btn:hover{background:rgba(255,255,255,0.08);color:#fff}
+.cap-btn.close:hover{background:#c42b1c;color:#fff}
+.cap-btn svg{width:10px;height:10px;fill:currentColor}
+.toolbar{
+  height:28px;background:rgba(0,0,0,0.25);
+  display:flex;align-items:center;padding:0 12px;gap:8px;
+  border-bottom:1px solid rgba(0,0,0,0.3);flex-shrink:0;
+}
+.toolbar-item{font-size:10px;color:#555;cursor:pointer;padding:2px 8px;border-radius:3px}
+.toolbar-item:hover{background:rgba(255,255,255,0.06);color:#999}
+.toolbar-spacer{flex:1}
+.pane-indicator{font-size:10px;color:#444;display:flex;align-items:center;gap:6px;}
+.pane-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 4px var(--green)}
+.pane{flex:1;display:flex;flex-direction:column;overflow:hidden;background:rgba(12,12,12,0.6)}
+.terminal{
+  flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 12px 4px;
+  font-size:13px;line-height:1.5;
+}
+.terminal::-webkit-scrollbar{width:6px}
+.terminal::-webkit-scrollbar-track{background:transparent}
+.terminal::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+.terminal::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}
+.ln{color:var(--white);white-space:pre-wrap;word-break:break-all;line-height:1.5}
+.ln.g{color:var(--green);text-shadow:0 0 8px rgba(22,198,12,0.35)}
+.ln.gd{color:var(--green-dim)}
+.ln.b{color:var(--blue);text-shadow:0 0 6px rgba(59,120,255,0.3)}
+.ln.c{color:var(--cyan)}
+.ln.y{color:var(--yellow)}
+.ln.r{color:var(--red)}
+.ln.p{color:var(--purple)}
+.ln.d{color:var(--dim)}
+.ln.w{font-weight:600}
+.ln.ascii{color:var(--green);font-size:10.5px;line-height:1.2;text-shadow:0 0 10px rgba(22,198,12,0.45)}
+.prompt-echo{display:flex;align-items:baseline;gap:0;flex-wrap:wrap}
+.ps-user{color:var(--yellow)}
+.ps-at{color:var(--dim)}
+.ps-host{color:var(--cyan)}
+.ps-sep{color:var(--dim)}
+.ps-path{color:var(--blue)}
+.ps-gt{color:var(--white)}
+.ps-cmd{color:var(--white);margin-left:5px}
+.input-row{display:flex;align-items:center;padding:2px 12px 10px;flex-shrink:0;}
+.ps-live{display:flex;align-items:baseline;gap:0;font-size:13px;flex-shrink:0;white-space:nowrap}
+.cmd-input{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--white);font-family:'Cascadia Code','Fira Code',monospace;font-size:13px;
+  caret-color:var(--white);margin-left:5px;line-height:1.5;
+}
+.cmd-input::selection{background:rgba(0,103,192,0.5)}
+.statusbar{
+  height:22px;background:var(--win11-accent);
+  display:flex;align-items:center;padding:0 12px;gap:16px;flex-shrink:0;
+}
+.sb-item{font-size:10px;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.sb-item.right{margin-left:auto}
+.sb-sep{color:rgba(255,255,255,0.3);font-size:14px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fi{animation:fadeIn .15s ease-out forwards}
+@keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
+.dri{color:var(--cyan)}
+.fli{color:var(--white)}
+.exei{color:var(--green)}
+/* Autocomplete suggestion */
+.suggest{
+  position:absolute;bottom:38px;left:12px;
+  background:#1a1a2e;border:1px solid rgba(0,103,192,0.5);
+  border-radius:4px;padding:4px 0;min-width:200px;max-width:400px;
+  z-index:100;box-shadow:0 4px 16px rgba(0,0,0,0.6);
+}
+.suggest-item{
+  padding:3px 12px;font-size:12px;color:#aaa;cursor:pointer;white-space:nowrap;
+}
+.suggest-item.sel{background:rgba(0,103,192,0.4);color:#fff}
+.suggest-item:hover{background:rgba(255,255,255,0.06);color:#fff}
+@media(max-width:640px){
+  .wt-window{width:100vw;height:100dvh;border-radius:0;border:none}
+  .tab{min-width:120px}
+  .ln{font-size:11px}
+  .ln.ascii{font-size:8px}
+  .cmd-input,.ps-live{font-size:11px}
+  .toolbar{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wallpaper"></div>
+<div class="scanlines"></div>
+
+<div class="wt-window" id="wtWin">
+  <div class="titlebar">
+    <div class="titlebar-tabs">
+      <div class="tab active">
+        <span class="tab-icon">⊞</span>
+        <span>Windows PowerShell</span>
+        <span class="tab-close">✕</span>
+      </div>
+      <div class="tab" style="min-width:120px;font-size:11px;color:#555">
+        <span class="tab-icon" style="color:#555">⊞</span>
+        <span>Command Prompt</span>
+        <span class="tab-close">✕</span>
+      </div>
+      <div class="tab-new" title="New tab (Ctrl+Shift+T)">+</div>
+    </div>
+    <div class="caption-btns">
+      <button class="cap-btn" title="Help" onclick="runCmd('help')">
+        <svg viewBox="0 0 16 16"><path d="M8 5a3 3 0 100 6A3 3 0 008 5zm0 1a2 2 0 110 4A2 2 0 018 6zm0-5C4.134 1 1 4.134 1 8s3.134 7 7 7 7-3.134 7-7-3.134-7-7-7zm0 1a6 6 0 110 12A6 6 0 018 2z"/></svg>
+      </button>
+      <button class="cap-btn" title="Minimize" onclick="doMinimize()">
+        <svg viewBox="0 0 16 16"><rect x="2" y="8" width="12" height="1.5"/></svg>
+      </button>
+      <button class="cap-btn" title="Maximize/Restore" onclick="doMaximize()">
+        <svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="0" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="cap-btn close" title="Close" onclick="doClose()">
+        <svg viewBox="0 0 16 16"><path d="M2.293 2.293a1 1 0 011.414 0L8 6.586l4.293-4.293a1 1 0 111.414 1.414L9.414 8l4.293 4.293a1 1 0 01-1.414 1.414L8 9.414l-4.293 4.293a1 1 0 01-1.414-1.414L6.586 8 2.293 3.707a1 1 0 010-1.414z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <span class="toolbar-item">File</span>
+    <span class="toolbar-item">Edit</span>
+    <span class="toolbar-item">View</span>
+    <span class="toolbar-item">Settings</span>
+    <div class="toolbar-spacer"></div>
+    <div class="pane-indicator">
+      <span class="pane-dot"></span>
+      <span style="font-size:10px;color:#444">POWERSHELL 7.4 (x64)</span>
+    </div>
+  </div>
+
+  <div class="pane" style="position:relative">
+    <div class="terminal" id="terminal"></div>
+    <div id="suggestBox" class="suggest" style="display:none"></div>
+    <div class="input-row" id="inputRow" style="display:none">
+      <div class="ps-live" id="livePrompt">
+        <span class="ps-user">PS</span>
+        <span class="ps-sep">&nbsp;</span>
+        <span class="ps-path" id="cwdSpan">C:\Users\Baibhab</span>
+        <span class="ps-gt">&gt;</span>
+      </div>
+      <input class="cmd-input" id="cmdInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <div class="sb-item"><span>⊞ POWERSHELL</span></div>
+    <div class="sb-sep">|</div>
+    <div class="sb-item" id="sbCpu">CPU 0.0%</div>
+    <div class="sb-sep">|</div>
+    <div class="sb-item" id="sbMem">RAM 0 MB</div>
+    <div class="sb-sep">|</div>
+    <div class="sb-item">UTF-8</div>
+    <div class="sb-sep">|</div>
+    <div class="sb-item">CRLF</div>
+    <div class="sb-item right" id="sbClock"></div>
+  </div>
+</div>
+
+<script>
+const term    = document.getElementById('terminal');
+const inp     = document.getElementById('cmdInput');
+const inpRow  = document.getElementById('inputRow');
+const cwdSpan = document.getElementById('cwdSpan');
+const sugBox  = document.getElementById('suggestBox');
+
+let hist=[], hidx=-1, booting=true, soundOn=false, maximized=false;
+let sugItems=[], sugIdx=-1;
+
+// ── File System ──────────────────────────────────────────────────────
+const ROOT = 'C:\\Users\\Baibhab';
+let cwd = ROOT;
+
+// Every folder must have an FS entry with its children listed
+const FS = {
+  [ROOT]:                                   {type:'dir', children:['projects','skills','archives','contact','Desktop']},
+  [ROOT+'\\projects']:                       {type:'dir', children:['robotics-arm','linux-optimizer','hardware-mods','README.md']},
+  [ROOT+'\\projects\\robotics-arm']:         {type:'dir', children:['overview.md','code-snippets.md','components.txt']},
+  [ROOT+'\\projects\\linux-optimizer']:      {type:'dir', children:['overview.md','benchmarks.txt','patches.md']},
+  [ROOT+'\\projects\\hardware-mods']:        {type:'dir', children:['overview.md','mod-log.txt']},
+  [ROOT+'\\skills']:                         {type:'dir', children:['skills.md','certifications.md']},
+  [ROOT+'\\archives']:                       {type:'dir', children:['2022-batch','2023-projects','notes.txt']},
+  [ROOT+'\\archives\\2022-batch']:           {type:'dir', children:['early-arduino.md','first-robot.md']},
+  [ROOT+'\\archives\\2023-projects']:        {type:'dir', children:['ros-experiments.md','kernel-notes.md']},
+  [ROOT+'\\contact']:                        {type:'dir', children:['email.txt','github.txt','resume.txt']},
+  [ROOT+'\\Desktop']:                        {type:'dir', children:['portfolio-shortcut.lnk','README.lnk']},
+};
+
+function cwdShort(p){ return p; }
+
+// ── Audio ────────────────────────────────────────────────────────────
+let AC;
+function ensureAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)()}
+function playClick(){
+  if(!soundOn)return; ensureAC();
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.connect(g);g.connect(AC.destination);
+  o.type='square';o.frequency.value=600+Math.random()*300;
+  g.gain.setValueAtTime(0.03,AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.035);
+  o.start();o.stop(AC.currentTime+0.035);
+}
+function playStartup(){
+  ensureAC();
+  [[523,0],[659,0.1],[784,0.2],[1047,0.32]].forEach(([f,t])=>{
+    const o=AC.createOscillator(),g=AC.createGain();
+    o.connect(g);g.connect(AC.destination);
+    o.frequency.value=f;o.type='sine';
+    const s=AC.currentTime+t;
+    g.gain.setValueAtTime(0,s);
+    g.gain.linearRampToValueAtTime(0.05,s+0.05);
+    g.gain.exponentialRampToValueAtTime(0.001,s+0.22);
+    o.start(s);o.stop(s+0.22);
+  });
+}
+
+// ── DOM helpers ──────────────────────────────────────────────────────
+function addLine(txt,cls='',delay=0){
+  return new Promise(r=>setTimeout(()=>{
+    const d=document.createElement('div');
+    d.className='ln fi'+(cls?' '+cls:'');
+    d.textContent=txt;
+    term.appendChild(d);
+    term.scrollTop=term.scrollHeight;
+    r();
+  },delay));
+}
+function addHTML(html,cls='',delay=0){
+  return new Promise(r=>setTimeout(()=>{
+    const d=document.createElement('div');
+    d.className='ln fi'+(cls?' '+cls:'');
+    d.innerHTML=html;
+    term.appendChild(d);
+    term.scrollTop=term.scrollHeight;
+    r();
+  },delay));
+}
+function addBlank(delay=0){return addLine('','d',delay)}
+
+function echoPrompt(cmd){
+  const d=document.createElement('div');
+  d.className='prompt-echo fi';
+  d.innerHTML=`<span class="ps-user">PS</span> <span class="ps-path">${esc(cwdShort(cwd))}</span><span class="ps-gt">&gt;</span><span class="ps-cmd">${esc(cmd)}</span>`;
+  term.appendChild(d);
+  term.scrollTop=term.scrollHeight;
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function renderLines(lines){
+  lines.forEach(([t,c])=>{
+    if(c==='__html') addHTML(t);
+    else addLine(t,c||'');
+  });
+  term.scrollTop=term.scrollHeight;
+}
+
+// ── File Content Database ────────────────────────────────────────────
+const CAT={
+
+  // ── Skills ──
+  'skills.md':()=>[
+    ['','d'],
+    ['    # Skills.md — Technical Proficiency Matrix','g w'],
+    ['    ═══════════════════════════════════════════════════════════','gd'],
+    ['    Skill              Bar                    Level   Domain','d'],
+    ['    ───────────────────────────────────────────────────────────','d'],
+    ...([
+      ['Python 3',   90,'██████████████████░░','Expert',   'Scripting, automation, pipelines'],
+      ['Linux Shell',95,'███████████████████░','Expert',   'Bash, Zsh, systemd, kernel'],
+      ['C / C++',    75,'███████████████░░░░░','Advanced', 'Embedded, Arduino firmware'],
+      ['C#',         65,'█████████████░░░░░░░','Mid',      '.NET desktop utilities'],
+      ['HTML/CSS',   80,'████████████████░░░░','Advanced', 'Web, terminal UIs'],
+      ['Arduino',    88,'█████████████████░░░','Expert',   'Sensors, motor control'],
+      ['ROS',        70,'██████████████░░░░░░','Mid',      'Robot OS, nodes, topics'],
+      ['Git',        85,'█████████████████░░░','Advanced', 'Version control, CI'],
+    ].map(([n,p,b,l,d])=>[`    ${n.padEnd(18)} [${b}] ${String(p).padStart(3)}%  ${l.padEnd(9)} ${d}`,''])),
+    ['    ───────────────────────────────────────────────────────────','d'],
+    ['','d'],
+    ['    Focus: robotics | linux-kernel | embedded | systems-engineering','c'],
+    ['','d'],
+  ],
+
+  'certifications.md':()=>[
+    ['','d'],
+    ['    # Certifications','g w'],
+    ['    ─────────────────────────────────────────────','d'],
+    ['    [PASS] Linux Fundamentals    LFS101x  (edX)','g'],
+    ['    [PASS] Arduino & Embedded C  Project-based','g'],
+    ['    [PASS] ROS Basics            Robotics coursework','g'],
+    ['    [PASS] Python for Engineers  Self-directed + coursework','g'],
+    ['    [----] CompTIA Linux+        In progress...','y'],
+    ['','d'],
+  ],
+
+  // ── Projects: robotics-arm ──
+  'overview.md':()=>{
+    // Context-sensitive based on cwd
+    if(cwd.includes('robotics-arm')) return [
+      ['','d'],
+      ['    # Project: 6-DOF Robotic Arm','g w'],
+      ['    ─────────────────────────────────────────────────────────','gd'],
+      ['    Status   : ● Active Development','g'],
+      ['    Language : C++ / Python / ROS Noetic',''],
+      ['    Hardware : Arduino Mega 2560 + custom PCB',''],
+      ['    Duration : Jan 2023 – Present','d'],
+      ['','d'],
+      ['    ## Overview','y'],
+      ['    A 6 degree-of-freedom robotic arm built from scratch.',''],
+      ['    Servo control via Arduino, kinematics solved in Python,',''],
+      ['    ROS nodes for real-time trajectory planning.',''],
+      ['','d'],
+      ['    ## Key Features','y'],
+      ['    ● Inverse kinematics solver (custom Python impl)','c'],
+      ['    ● PID-tuned servo control per joint','c'],
+      ['    ● ROS topic pub/sub for live telemetry','c'],
+      ['    ● Serial bridge: Python ↔ Arduino at 115200 baud','c'],
+      ['    ● URDF model for RViz visualization','c'],
+      ['','d'],
+      ['    ## Challenges Solved','y'],
+      ['    ● Gimbal lock prevention via quaternion math','d'],
+      ['    ● Servo jitter: hardware PWM + capacitor filters','d'],
+      ['    ● Heat management on continuous-duty joints','d'],
+      ['','d'],
+      ['    Run: cat components.txt  |  cat code-snippets.md','gd'],
+      ['','d'],
+    ];
+    if(cwd.includes('linux-optimizer')) return [
+      ['','d'],
+      ['    # Project: Linux Kernel Optimizer','g w'],
+      ['    ─────────────────────────────────────────────────────────','gd'],
+      ['    Status   : ● Ongoing / Maintained','g'],
+      ['    Language : Bash / Python / C (kernel patches)',''],
+      ['    Target   : Arch Linux, Ubuntu 22.04+, Debian',''],
+      ['    Duration : Jul 2022 – Present','d'],
+      ['','d'],
+      ['    ## Overview','y'],
+      ['    A personal toolkit of scripts and kernel patches for',''],
+      ['    squeezing maximum performance from Linux workstations.',''],
+      ['    Includes CPU governor tuning, IRQ affinity, and I/O',''],
+      ['    scheduler optimization.',''],
+      ['','d'],
+      ['    ## Components','y'],
+      ['    ● cpu-tune.sh   — Sets governor, disables C-states','c'],
+      ['    ● irq-pin.py    — Pins IRQs to isolated cores','c'],
+      ['    ● io-sched.sh   — Switches scheduler (mq-deadline/kyber)','c'],
+      ['    ● mem-huge.sh   — Enables transparent huge pages','c'],
+      ['    ● thermal-mon   — Real-time thermal monitoring daemon','c'],
+      ['','d'],
+      ['    ## Results (Workstation Benchmarks)','y'],
+      ['    ● Compile time (Linux kernel): -18% vs stock','g'],
+      ['    ● Disk I/O (fio): +34% sequential read','g'],
+      ['    ● Latency (cyclictest): 42μs → 11μs (RT patch)','g'],
+      ['','d'],
+      ['    Run: cat benchmarks.txt  |  cat patches.md','gd'],
+      ['','d'],
+    ];
+    if(cwd.includes('hardware-mods')) return [
+      ['','d'],
+      ['    # Project: Hardware Modifications','g w'],
+      ['    ─────────────────────────────────────────────────────────','gd'],
+      ['    Status   : ● Ongoing hobby / R&D','g'],
+      ['    Domain   : PCB design, thermal, overclocking, firmware',''],
+      ['    Tools    : KiCad, soldering station, oscilloscope',''],
+      ['','d'],
+      ['    ## Completed Mods','y'],
+      ['    ● Custom PCB for robotics arm power distribution','c'],
+      ['    ● Workstation delidding + Thermal Grizzly Conductonaut','c'],
+      ['    ● Custom fan curves via embedded microcontroller','c'],
+      ['    ● USB-C PD negotiation board (STM32 + FUSB302)','c'],
+      ['    ● 3D-printed enclosures with parametric OpenSCAD models','c'],
+      ['','d'],
+      ['    ## Tools & Skills','y'],
+      ['    ● KiCad 7 — schematic + PCB layout','d'],
+      ['    ● SMD soldering (0402 components)','d'],
+      ['    ● Logic analyser + oscilloscope debugging','d'],
+      ['    ● Firmware: bare-metal C on STM32 / AVR','d'],
+      ['','d'],
+      ['    Run: cat mod-log.txt','gd'],
+      ['','d'],
+    ];
+    // archives subdirs
+    if(cwd.includes('2022-batch')||cwd.includes('2023-projects')) return [
+      ['','d'],['    (archive overview — use cat <file> for details)','d'],['','d'],
+    ];
+    return [['','d'],['    (No overview available here)','d'],['','d']];
+  },
+
+  'code-snippets.md':()=>[
+    ['','d'],
+    ['    # Robotics Arm — Code Snippets','g w'],
+    ['    ─────────────────────────────────────────────────────────','gd'],
+    ['    ## IK Solver (Python excerpt)','y'],
+    ['    ─────────────────────────────────────────────────────────','d'],
+    ['    def solve_ik(target_pos, link_lengths):','b'],
+    ['        """Geometric IK for 3-DOF planar subchain"""','d'],
+    ['        x, y, z = target_pos','b'],
+    ['        l1, l2, l3 = link_lengths','b'],
+    ['        r = math.sqrt(x**2 + z**2)','b'],
+    ['        # Law of cosines for elbow angle','d'],
+    ['        cos_q2 = (r**2 + y**2 - l1**2 - l2**2)','b'],
+    ['                 / (2 * l1 * l2)','b'],
+    ['        q2 = math.atan2(math.sqrt(1-cos_q2**2), cos_q2)','b'],
+    ['        return [q1, q2, q3]  # joint angles (rad)','b'],
+    ['','d'],
+    ['    ## Arduino Serial Handler (C++)','y'],
+    ['    ─────────────────────────────────────────────────────────','d'],
+    ['    void parseCommand(String cmd) {','b'],
+    ['      int angles[6];','b'],
+    ['      sscanf(cmd.c_str(), "%d,%d,%d,%d,%d,%d",','b'],
+    ['             &angles[0],&angles[1],&angles[2],','b'],
+    ['             &angles[3],&angles[4],&angles[5]);','b'],
+    ['      for(int i=0;i<6;i++)','b'],
+    ['        servos[i].write(constrain(angles[i],0,180));','b'],
+    ['    }','b'],
+    ['','d'],
+  ],
+
+  'components.txt':()=>[
+    ['','d'],
+    ['    # Bill of Materials — 6-DOF Arm','g w'],
+    ['    ─────────────────────────────────────────────','d'],
+    ['    Qty  Component              Spec','d'],
+    ['    ───────────────────────────────────────────────','d'],
+    ['     6×  MG996R Servo           180° / 10 kg·cm',''],
+    ['     1×  Arduino Mega 2560      ATmega2560',''],
+    ['     1×  Custom Power PCB       5V/3A + 6V/5A rails',''],
+    ['     1×  Raspberry Pi 5         ROS compute node',''],
+    ['     1×  USB-Serial TTL         CH340G, 115200 baud',''],
+    ['     6×  Aluminium brackets     custom CNC',''],
+    ['     1×  12V 10A PSU            regulated',''],
+    ['     6×  100μF cap              servo decoupling',''],
+    ['    ───────────────────────────────────────────────','d'],
+    ['    Total BOM cost: ~₹4,200','y'],
+    ['','d'],
+  ],
+
+  // ── Projects: linux-optimizer ──
+  'benchmarks.txt':()=>[
+    ['','d'],
+    ['    # linux-optimizer — Benchmark Results','g w'],
+    ['    ══════════════════════════════════════════════════════','gd'],
+    ['    Test             Stock       Tuned      Delta','d'],
+    ['    ──────────────────────────────────────────────────────','d'],
+    ['    Kernel compile   14m 22s     11m 44s    -18.4%  ↑↑','g'],
+    ['    fio seq read     1.2 GB/s    1.6 GB/s   +33.3%  ↑↑','g'],
+    ['    fio seq write    980 MB/s    1.1 GB/s   +12.2%  ↑','g'],
+    ['    cyclictest lat   42 μs       11 μs      -73.8%  ↑↑','g'],
+    ['    sysbench CPU     18,420      19,871     +7.9%   ↑','g'],
+    ['    Boot time        14.2s       9.8s       -31.0%  ↑↑','g'],
+    ['    ──────────────────────────────────────────────────────','d'],
+    ['    System: Arch Linux · kernel 6.8.0-rt · AMD Ryzen 7','d'],
+    ['','d'],
+  ],
+
+  'patches.md':()=>[
+    ['','d'],
+    ['    # Kernel Patches Applied','g w'],
+    ['    ──────────────────────────────────────────────────────','d'],
+    ['    [APPLIED] PREEMPT_RT v6.8 real-time patch','g'],
+    ['    [APPLIED] BFQ I/O scheduler (default for HDD)','g'],
+    ['    [APPLIED] Kyber I/O scheduler (NVMe)','g'],
+    ['    [APPLIED] USB-C sleep regression fix (6.8.2)','g'],
+    ['    [APPLIED] AMD P-state EPP tuning','g'],
+    ['    [PENDING] NTSYNC futex patch (kernel 6.10)','y'],
+    ['    [TESTING] Zen4 cache topology fix','y'],
+    ['    ──────────────────────────────────────────────────────','d'],
+    ['','d'],
+    ['    All patches tracked in Git: github/baibhab-das/kernel-configs','d'],
+    ['','d'],
+  ],
+
+  // ── Projects: hardware-mods ──
+  'mod-log.txt':()=>[
+    ['','d'],
+    ['    # Hardware Mod Log','g w'],
+    ['    ──────────────────────────────────────────────────────','d'],
+    ['    2024-03-15  Delidded Ryzen 9 + Conductonaut  -12°C peak','g'],
+    ['    2024-02-08  USB-C PD board assembled & tested    OK','g'],
+    ['    2024-01-20  Robotics arm PCB v2 fabricated        OK','g'],
+    ['    2023-11-04  Custom fan controller fw v1.2          OK','g'],
+    ['    2023-09-17  3D printed arm housing (PLA+)          OK','g'],
+    ['    2023-07-02  SMD reflow: STM32 USB bridge           OK','g'],
+    ['    2023-04-11  First custom PCB — servo power board   OK','g'],
+    ['    ──────────────────────────────────────────────────────','d'],
+    ['','d'],
+  ],
+
+  // ── Archives ──
+  'early-arduino.md':()=>[
+    ['','d'],
+    ['    # Archive: Early Arduino Work (2022)','g w'],
+    ['    ──────────────────────────────────────────────────────','d'],
+    ['    ● Traffic light simulator (GPIO basics)','d'],
+    ['    ● Ultrasonic distance meter (HC-SR04)','d'],
+    ['    ● Line-follower robot (IR sensors + L298N)','d'],
+    ['    ● OLED weather display (DHT22 + SSD1306)','d'],
+    ['    ● Serial command parser (first serial comms)','d'],
+    ['','d'],
+    ['    These projects built the foundation for the 6-DOF arm.','d'],
+    ['','d'],
+  ],
+
+  'first-robot.md':()=>[
+    ['','d'],
+    ['    # Archive: First Robot (2022)','g w'],
+    ['    ──────────────────────────────────────────────────────','d'],
+    ['    A differential-drive bot with ultrasonic obstacle avoidance.',''],
+    ['    ● Platform  : Arduino Uno + L298N motor driver',''],
+    ['    ● Sensors   : HC-SR04 ultrasonic (front + side)',''],
+    ['    ● Behaviour : Wall-following + obstacle avoidance',''],
+    ['    ● Control   : Proportional steering correction',''],
+    ['','d'],
+    ['    Outcome: Competed in intra-college robotics challenge.','y'],
+    ['','d'],
+  ],
+
+  'ros-experiments.md':()=>[
+    ['','d'],
+    ['    # Archive: ROS Experiments (2023)','g w'],
+    ['    ──────────────────────────────────────────────────────','d'],
+    ['    ● Set up ROS Noetic on Ubuntu 20.04 VM','d'],
+    ['    ● Wrote first publisher/subscriber nodes (Python)','d'],
+    ['    ● Visualized arm URDF model in RViz','d'],
+    ['    ● Experimented with move_it! for path planning','d'],
+    ['    ● Bridged Arduino serial data to ROS topics','d'],
+    ['','d'],
+    ['    Laid the groundwork for the robotics-arm ROS integration.','d'],
+    ['','d'],
+  ],
+
+  'kernel-notes.md':()=>[
+    ['','d'],
+    ['    # Archive: Kernel Notes (2023)','g w'],
+    ['    ──────────────────────────────────────────────────────','d'],
+    ['    Early notes from first kernel compilation:','d'],
+    ['    ● Built vanilla 6.1 LTS from source','d'],
+    ['    ● Learned menuconfig, localmodconfig','d'],
+    ['    ● First PREEMPT_RT patch attempt (partial success)','d'],
+    ['    ● Studied scheduler source: kernel/sched/fair.c','d'],
+    ['    ● Wrote first kernel module (hello_world.ko)','d'],
+    ['','d'],
+  ],
+
+  // ── README ──
+  'README.md':()=>[
+    ['','d'],
+    ['    # Projects Directory — README','g w'],
+    ['    ──────────────────────────────────────────────────────','d'],
+    ['    Subdirectories:','d'],
+    ['      robotics-arm\\    6-DOF arm build (active)','c'],
+    ['      linux-optimizer\\ Kernel tuning toolkit (active)','c'],
+    ['      hardware-mods\\   PCB, thermal, firmware mods','c'],
+    ['','d'],
+    ['    Usage:','d'],
+    ['      cd robotics-arm    then ls    then cat overview.md','d'],
+    ['      cd linux-optimizer then ls    then cat overview.md','d'],
+    ['      cd hardware-mods   then ls    then cat overview.md','d'],
+    ['','d'],
+  ],
+
+  // ── Contact ──
+  'notes.txt':()=>[
+    ['','d'],['    // scratch notes','d'],
+    ['    kernel 6.8 patch: fix USB-C sleep regression',''],
+    ['    TODO: benchmark Thermal Grizzly Kryonaut on workstation','y'],
+    ['    servo jitter root cause: shared 5V rail — fixed with cap bank','d'],
+    ['','d'],
+  ],
+  'email.txt':()=>[['','d'],['    → Available via institutional channels or LinkedIn.','b'],['','d']],
+  'github.txt':()=>[['','d'],['    → Search: baibhab-das on GitHub','b'],['    → Repos: robotics-arm, kernel-configs, arduino-projects','d'],['','d']],
+  'resume.txt':()=>[['','d'],['    → Resume available on request.','y'],['    → Run "contact" for details.','d'],['','d']],
+  'portfolio-shortcut.lnk':()=>[['','d'],['    [Shortcut] → You are already here.','g'],['','d']],
+  'README.lnk':()=>[['','d'],['    [Shortcut] → Type "help" to get started.','g'],['','d']],
+};
+
+// ── Command map ──────────────────────────────────────────────────────
+const CMDS={
+  whoami:()=>[
+    ['','d'],
+    ['    ┌─────────────────────────────────────────────────────────┐','gd'],
+    ['    │  Identity Record                                        │','gd'],
+    ['    ├─────────────────────────────────────────────────────────┤','gd'],
+    ['    │  Name     : Baibhab Das                                 │',''],
+    ['    │  Origin   : Former Student, M.P. Birla Foundation       │',''],
+    ['    │  Focus    : Linux Optimization · Robotics · Hardware    │',''],
+    ['    │                                                         │','gd'],
+    ['    │  Transitioned from academic logic to specialized        │','d'],
+    ['    │  systems engineering. Currently working on Linux        │','d'],
+    ['    │  kernel tuning, 6-DOF robotics, and hardware mods.      │','d'],
+    ['    │                                                         │','gd'],
+    ['    │  Philosophy: Write code that respects the machine.      │','d'],
+    ['    └─────────────────────────────────────────────────────────┘','gd'],
+    ['','d'],
+  ],
+
+  help:()=>[
+    ['','d'],
+    ['    Windows Terminal Portfolio — Command Reference','g w'],
+    ['    ═══════════════════════════════════════════════════════════','gd'],
+    ['    Command          Alias      Description','d'],
+    ['    ───────────────────────────────────────────────────────────','d'],
+    ['    whoami                      Identity & biography',''],
+    ['    ls / dir                    List directory contents',''],
+    ['    cd <dir>                    Change directory (.. to go up)',''],
+    ['    cat <file>                  Read a file',''],
+    ['    projects                    Project overview (shortcut)',''],
+    ['    clear / cls                 Clear the terminal',''],
+    ['    neofetch                    System info splash',''],
+    ['    contact                     Contact details',''],
+    ['    history                     Command history',''],
+    ['    pwd                         Print working directory',''],
+    ['    sound                       Toggle keyboard click sounds',''],
+    ['    ver                         OS version info',''],
+    ['    systeminfo                  System information',''],
+    ['    ───────────────────────────────────────────────────────────','d'],
+    ['    ↑ / ↓  = history    Tab = autocomplete (cmds + files)','d'],
+    ['    Ctrl+L = clear       Ctrl+C = cancel input','d'],
+    ['','d'],
+  ],
+
+  projects:()=>[
+    ['','d'],
+    ['    ┌─ Projects Overview ────────────────────────────────────┐','gd'],
+    ['    │                                                        │','gd'],
+    ['    │  [1] robotics-arm      6-DOF arm with ROS + Arduino   │','c'],
+    ['    │      └─ IK solver, PID servos, URDF, serial bridge    │','d'],
+    ['    │                                                        │','gd'],
+    ['    │  [2] linux-optimizer   Kernel tuning toolkit          │','c'],
+    ['    │      └─ RT patches, scheduler, IRQ, benchmark -18%    │','d'],
+    ['    │                                                        │','gd'],
+    ['    │  [3] hardware-mods     PCB design + firmware + thermal│','c'],
+    ['    │      └─ KiCad, STM32, SMD, delidding, USB-C PD       │','d'],
+    ['    │                                                        │','gd'],
+    ['    │  Navigate: cd projects\\robotics-arm                   │','y'],
+    ['    │            then: cat overview.md                      │','y'],
+    ['    └────────────────────────────────────────────────────────┘','gd'],
+    ['','d'],
+  ],
+
+  contact:()=>[
+    ['','d'],
+    ['    ┌─ Contact ──────────────────────────────────────────────┐','gd'],
+    ['    │  Institution : M.P. Birla Foundation, Kolkata          │',''],
+    ['    │  Expertise   : Linux | Robotics | Hardware Engineering │',''],
+    ['    │  Open To     : Collaboration, projects, internships    │',''],
+    ['    │                                                        │','gd'],
+    ['    │  → cat contact\\email.txt                              │','b'],
+    ['    │  → cat contact\\github.txt                             │','b'],
+    ['    │  → cat contact\\resume.txt                             │','b'],
+    ['    └────────────────────────────────────────────────────────┘','gd'],
+    ['','d'],
+  ],
+
+  neofetch:()=>{
+    const up=Math.floor(performance.now()/1000);
+    const m=String(Math.floor(up/60)).padStart(2,'0'),s=String(up%60).padStart(2,'0');
+    return[
+      ['','d'],
+      ['          .-------.       baibhab@mpbirla-foundation','g w'],
+      ['         /  .-.   \\      ─────────────────────────────────────','gd'],
+      ["        | |  _  | |      OS:       Windows 11 Pro (WSL2 Arch)",''],
+      ["         \\ '--' /        Kernel:   6.8.0-rt-mpbirla-patched",''],
+      ["          \`-----\'        Shell:    PowerShell 7.4.0",''],
+      ['         /|     |\\       Terminal: Windows Terminal 1.21',''],
+      ['        / |     | \\      Uptime:   '+m+'m '+s+'s',''],
+      ['       /  |_____|  \\     CPU:      Focus Mode™ (RT-tuned)',''],
+      ['      /____|   |____\\    GPU:      Dedicated (modded VBIOS)',''],
+      ['                         Projects: 3 active, 2 archived',''],
+      ['                         Colors:   256 (phosphor theme)',''],
+      ['','d'],
+    ];
+  },
+
+  sudo:()=>[
+    ['','d'],
+    ['    sudo : The term "sudo" is not recognized as the name of a','r'],
+    ['    cmdlet, function, script file, or operable program.','r'],
+    ['    Did you mean: "runas" ?','y'],
+    ['','d'],
+    ['    ⚠  Access Denied. This incident has been reported.','r w'],
+    ['    Event logged → C:\\Windows\\System32\\winevt\\Security.evtx','d'],
+    ['','d'],
+  ],
+
+  history:()=>{
+    if(!hist.length) return[['    (No command history)','d'],['','d']];
+    const out=[['','d'],['      Id  CommandLine','d'],['      --  -----------','d']];
+    hist.slice().reverse().forEach((h,i)=>{
+      out.push([`     ${String(i+1).padStart(4,'0')}  ${h}`,'']);
+    });
+    out.push(['','d']);
+    return out;
+  },
+
+  pwd:()=>[['    '+cwdShort(cwd),''],['','d']],
+  date:()=>[['    '+new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST',''],['','d']],
+  echo:(a)=>[['    '+a.join(' '),''],['','d']],
+
+  ver:()=>[
+    ['','d'],
+    ['    Microsoft Windows [Version 11.0.26100.3915]',''],
+    ['    (c) Microsoft Corporation. All rights reserved.','d'],
+    ['','d'],
+  ],
+
+  systeminfo:()=>[
+    ['','d'],
+    ['    Host Name         : MPBIRLA-WORKSTATION','g'],
+    ['    OS Name           : Microsoft Windows 11 Pro',''],
+    ['    OS Version        : 10.0.26100 Build 26100',''],
+    ['    System Type       : x64-based PC',''],
+    ['    Processor         : Custom-tuned (RT kernel, OC)',''],
+    ['    Total RAM         : 32,768 MB',''],
+    ['    Active Projects   : 3','c'],
+    ['    Domain            : mpbirla-foundation.local',''],
+    ['    Logon Server      : \\\\MPBIRLA-DC',''],
+    ['','d'],
+  ],
+
+  sound:()=>{
+    soundOn=!soundOn;
+    if(soundOn) ensureAC();
+    return[['','d'],[`    Keyboard sounds: ${soundOn?'● ENABLED':'○ DISABLED'}`,soundOn?'g':'d'],['','d']];
+  },
+};
+
+// ── Tab completion: commands + files in current dir ──────────────────
+const ALL_CMDS=['whoami','help','ls','dir','cd','cat','clear','cls','sudo','history',
+  'neofetch','contact','projects','sound','pwd','date','echo','ver','systeminfo',
+  'Get-ChildItem','Set-Location','Get-Content','Clear-Host'];
+
+function getCandidates(partial){
+  const p=partial.toLowerCase();
+  const parts=partial.split(/\s+/);
+
+  // If typing first word → complete commands
+  if(parts.length===1){
+    return ALL_CMDS.filter(c=>c.toLowerCase().startsWith(p)&&c.toLowerCase()!==p);
+  }
+
+  // If typing argument to cd/cat/ls → complete filesystem entries
+  const cmd=parts[0].toLowerCase();
+  const arg=parts.slice(1).join(' ');
+  if(['cd','set-location','cat','get-content'].includes(cmd)){
+    const node=FS[cwd];
+    if(!node) return [];
+    const argLower=arg.toLowerCase();
+    return node.children
+      .filter(c=>c.toLowerCase().startsWith(argLower)&&c.toLowerCase()!==argLower)
+      .map(c=>parts[0]+' '+c);
+  }
+  return [];
+}
+
+// ── Suggest box ──────────────────────────────────────────────────────
+function showSuggest(items, partial){
+  sugItems=items; sugIdx=0;
+  sugBox.innerHTML='';
+  items.slice(0,8).forEach((item,i)=>{
+    const d=document.createElement('div');
+    d.className='suggest-item'+(i===0?' sel':'');
+    d.textContent=item;
+    d.onmousedown=(e)=>{e.preventDefault();inp.value=item;hideSuggest();inp.focus();};
+    sugBox.appendChild(d);
+  });
+  sugBox.style.display=items.length?'block':'none';
+}
+function hideSuggest(){sugBox.style.display='none';sugItems=[];sugIdx=-1;}
+function moveSuggest(dir){
+  if(!sugItems.length) return;
+  sugIdx=Math.max(0,Math.min(sugItems.length-1,sugIdx+dir));
+  [...sugBox.children].forEach((el,i)=>{
+    el.classList.toggle('sel',i===sugIdx);
+  });
+  inp.value=sugItems[sugIdx];
+}
+
+// ── Process command ──────────────────────────────────────────────────
+function runCmd(raw){
+  const tr=raw.trim();
+  hideSuggest();
+  if(!tr) return;
+  if(hist[0]!==tr) hist.unshift(tr);
+  if(hist.length>100) hist.pop();
+  hidx=-1;
+  playClick();
+  echoPrompt(tr);
+
+  const parts=tr.split(/\s+/);
+  const cmd=parts[0].toLowerCase();
+  const args=parts.slice(1);
+
+  if(cmd==='clear'||cmd==='cls'||cmd==='clear-host'){term.innerHTML='';return}
+
+  // ── ls / dir ──
+  if(cmd==='ls'||cmd==='dir'||cmd==='get-childitem'){
+    const node=FS[cwd];
+    const items=node?node.children:[];
+    addBlank();
+    if(!items.length){addLine('    (empty directory)','d');addBlank();return}
+    addLine(`    Directory: ${cwdShort(cwd)}`,'d');
+    addBlank();
+    addLine('    Mode                 LastWriteTime         Length Name','d');
+    addLine('    ----                 -------------         ------ ----','d');
+    const now=new Date();
+    const ds=now.toLocaleDateString('en-GB')+' '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    items.forEach(item=>{
+      const fullPath=cwd+'\\'+item;
+      const isDir=!!FS[fullPath];
+      const mode=isDir?'d----':'-----';
+      const cls=isDir?'dri':(item.endsWith('.md')||item.endsWith('.txt')?'fli':(item.endsWith('.lnk')?'p':'exei'));
+      const len=isDir?'':String(Math.floor(Math.random()*8000+500));
+      const d=document.createElement('div');
+      d.className='ln fi';
+      d.innerHTML=`    <span style="color:var(--dim)">${mode}  ${ds}  ${isDir?'     ':len.padStart(6)}</span> <span class="${cls}">${esc(item)}</span>`;
+      term.appendChild(d);
+    });
+    addBlank();
+    term.scrollTop=term.scrollHeight;
+    return;
+  }
+
+  // ── cd ──
+  if(cmd==='cd'||cmd==='set-location'){
+    const tgt=args[0];
+    if(!tgt||tgt==='~'||tgt==='%userprofile%'){
+      cwd=ROOT;cwdSpan.textContent=cwdShort(cwd);addBlank();return;
+    }
+    if(tgt==='..'||tgt==='..\\'){
+      const p=cwd.lastIndexOf('\\');
+      if(p>2){cwd=cwd.slice(0,p);cwdSpan.textContent=cwdShort(cwd);}
+      addBlank();return;
+    }
+    // Resolve: could be absolute or relative; strip trailing backslash
+    const cleaned=tgt.replace(/\\$/,'');
+    const full=cleaned.startsWith('C:\\')?cleaned:(cwd+'\\'+cleaned);
+    if(FS[full]){
+      cwd=full;cwdSpan.textContent=cwdShort(cwd);addBlank();
+    } else {
+      addLine(`    Set-Location: Cannot find path '${tgt}' because it does not exist.`,'r');
+      addBlank();
+    }
+    return;
+  }
+
+  // ── cat ──
+  if(cmd==='cat'||cmd==='get-content'){
+    if(!args[0]){addLine('    Usage: cat <filename>','y');addBlank();return}
+    // Strip any leading path, just use filename
+    const fname=args[0].replace(/^.*[\\\/]/,'');
+    if(CAT[fname]){renderLines(CAT[fname]());}
+    else{addLine(`    Get-Content: Cannot find path '${args[0]}': No such file.`,'r');addBlank();}
+    return;
+  }
+
+  if(CMDS[cmd]){renderLines(CMDS[cmd](args));return}
+
+  addLine(`    ${esc(parts[0])} : The term '${esc(parts[0])}' is not recognized as the name of a cmdlet,`,'r');
+  addLine(`    function, script file, or operable program. Check the spelling or type "help".`,'d');
+  addBlank();
+}
+
+// ── Boot sequence ────────────────────────────────────────────────────
+async function boot(){
+  const ascii=[
+    ' ██████╗  █████╗ ██╗██████╗ ██╗  ██╗ █████╗ ██████╗',
+    ' ██╔══██╗██╔══██╗██║██╔══██╗██║  ██║██╔══██╗██╔══██╗',
+    ' ██████╔╝███████║██║██████╔╝███████║███████║██████╔╝',
+    ' ██╔══██╗██╔══██║██║██╔══██╗██╔══██║██╔══██║██╔══██╗',
+    ' ██████╔╝██║  ██║██║██████╔╝██║  ██║██║  ██║██████╔╝',
+    ' ╚═════╝ ╚═╝  ╚═╝╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝',
+    '',
+    '         ██████╗  █████╗ ███████╗',
+    '         ██╔══██╗██╔══██╗██╔════╝',
+    '         ██║  ██║███████║███████╗',
+    '         ██║  ██║██╔══██║╚════██║',
+    '         ██████╔╝██║  ██║███████║',
+    '         ╚═════╝ ╚═╝  ╚═╝╚══════╝',
+  ];
+
+  const bootLines=[
+    ['    Windows PowerShell 7.4.0','',0],
+    ['    Copyright (c) Microsoft Corporation.','d',40],
+    ['','d',70],
+    ['    Loading profile: C:\\Users\\Baibhab\\Documents\\PowerShell\\Profile.ps1','d',100],
+    ['    Initializing modules...','d',150],
+    ['','d',185],
+    ['    Import-Module : PSReadLine 2.3.5       [OK]','gd',210],
+    ['    Import-Module : Terminal-Icons 0.11.0  [OK]','gd',260],
+    ['    Import-Module : posh-git 1.1.0         [OK]','gd',310],
+    ['    Import-Module : RoboticsCore 3.2.1     [OK]','gd',360],
+    ['','d',400],
+    ['    Connecting to hardware interfaces...','d',430],
+    ['    [CONNECTED] Arduino Mega 2560     COM3    115200 baud','y',470],
+    ['    [CONNECTED] Raspberry Pi 5        SSH     192.168.1.42','y',520],
+    ['    [CONNECTED] USB-Serial TTY        COM4    ready','y',565],
+    ['    [CONNECTED] Robotics Arm GPIO     SPI0    ready','y',610],
+    ['','d',650],
+    ['    Applying kernel optimizations... done','gd',680],
+    ['    All systems nominal. Welcome back, Baibhab.','g',730],
+    ['','d',780],
+    ['    ═══════════════════════════════════════════════════════════','gd',810],
+  ];
+
+  for(const [t,c,d] of bootLines) await addLine(t,c,d);
+
+  let ad=840;
+  for(const line of ascii){await addLine(line,'ascii',ad);ad+=18;}
+
+  const info=[
+    ['','d',ad+10],
+    ['    ═══════════════════════════════════════════════════════════','gd',ad+30],
+    ['    System Status  :  ● ONLINE','g w',ad+50],
+    ['    Authorized User:  Former Student of M.P. Birla Foundation','',ad+70],
+    ['    Expertise      :  Linux Systems | Robotics | Hardware Engineering','c',ad+90],
+    ['    Session Start  :  '+new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST','d',ad+110],
+    ['    ═══════════════════════════════════════════════════════════','gd',ad+130],
+    ['','d',ad+150],
+    ['    Type "help" for commands  |  "projects" for project list','gd',ad+170],
+    ['    Tab autocompletes commands AND filenames in current dir.','d',ad+190],
+    ['','d',ad+210],
+  ];
+  for(const [t,c,d] of info) await addLine(t,c,d);
+
+  setTimeout(()=>{
+    try{playStartup();}catch(e){}
+    inpRow.style.display='flex';
+    inp.focus();booting=false;
+  },ad+240);
+}
+
+// ── Status bar ───────────────────────────────────────────────────────
+const sbCpu=document.getElementById('sbCpu');
+const sbMem=document.getElementById('sbMem');
+const sbClk=document.getElementById('sbClock');
+setInterval(()=>{
+  sbCpu.textContent='CPU '+(Math.random()*6+0.5).toFixed(1)+'%';
+  sbMem.textContent='RAM '+(Math.random()*160+520).toFixed(0)+' MB';
+  sbClk.textContent=new Date().toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',second:'2-digit'})+' IST';
+},1000);
+
+// ── Input handling ───────────────────────────────────────────────────
+inp.addEventListener('input',()=>{
+  const v=inp.value;
+  if(!v.trim()){hideSuggest();return;}
+  const candidates=getCandidates(v);
+  if(candidates.length>1) showSuggest(candidates,v);
+  else hideSuggest();
+});
+
+inp.addEventListener('keydown',e=>{
+  // If suggest box open, navigate it
+  if(sugItems.length&&(e.key==='ArrowUp'||e.key==='ArrowDown')){
+    e.preventDefault();
+    moveSuggest(e.key==='ArrowDown'?1:-1);
+    return;
+  }
+  if(sugItems.length&&e.key==='Escape'){hideSuggest();return;}
+
+  if(e.key==='Enter'){
+    const v=inp.value;inp.value='';hideSuggest();runCmd(v);
+  }
+  else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    if(hidx<hist.length-1){hidx++;inp.value=hist[hidx];}
+    requestAnimationFrame(()=>inp.setSelectionRange(inp.value.length,inp.value.length));
+  }
+  else if(e.key==='ArrowDown'){
+    e.preventDefault();
+    if(hidx>0){hidx--;inp.value=hist[hidx];}else{hidx=-1;inp.value='';}
+  }
+  else if(e.key==='Tab'){
+    e.preventDefault();
+    const v=inp.value;
+    const candidates=getCandidates(v);
+    if(candidates.length===1){
+      inp.value=candidates[0];hideSuggest();
+    } else if(candidates.length>1){
+      showSuggest(candidates,v);
+    }
+  }
+  else if(e.key==='l'&&e.ctrlKey){e.preventDefault();term.innerHTML='';}
+  else if(e.key==='c'&&e.ctrlKey){e.preventDefault();echoPrompt(inp.value+'^C');inp.value='';hideSuggest();}
+  playClick();
+});
+
+// Hide suggest when clicking outside
+document.addEventListener('mousedown',(e)=>{
+  if(!sugBox.contains(e.target)&&e.target!==inp) hideSuggest();
+});
+
+document.addEventListener('click',()=>{if(!booting)inp.focus();});
+
+// ── Window controls ──────────────────────────────────────────────────
+function doMinimize(){
+  const w=document.getElementById('wtWin');
+  w.style.transition='transform .25s,opacity .25s';
+  w.style.transform='scale(0.92)';w.style.opacity='0.2';
+  setTimeout(()=>{w.style.transform='';w.style.opacity='1';inp.focus();},1000);
+}
+function doClose(){
+  const w=document.getElementById('wtWin');
+  w.style.transition='transform .2s,opacity .2s';
+  w.style.transform='scale(0.95)';w.style.opacity='0';
+  setTimeout(()=>{w.style.transform='scale(1)';w.style.opacity='1';},800);
+}
+function doMaximize(){
+  const w=document.getElementById('wtWin');
+  maximized=!maximized;
+  if(maximized){
+    w.style.width='100vw';w.style.height='100vh';
+    w.style.borderRadius='0';w.style.border='none';
+  } else {
+    w.style.width='';w.style.height='';
+    w.style.borderRadius='8px';w.style.border='';
+  }
+  inp.focus();
+}
+
+boot();
+</script>
+</body>
+</html>
