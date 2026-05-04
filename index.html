@@ -3,1106 +3,479 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Baibhab Das — Windows Terminal Portfolio</title>
-<link href="https://fonts.googleapis.com/css2?family=Cascadia+Code:wght@300;400;600&display=swap" rel="stylesheet">
+<title>Baibhab Das — Linux Specialist & Robotics Inventor</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --green:#16c60c;--green-dim:#0ea800;--blue:#3b78ff;--cyan:#61d6d6;
-  --yellow:#f9f1a5;--red:#e74856;--purple:#b4009e;--white:#cccccc;
-  --dim:#666;--bg:#1e1e1e;--term-bg:rgba(12,12,12,0.82);
-  --border:rgba(255,255,255,0.08);--acrylic:rgba(32,32,32,0.75);
-  --titlebar:#2c2c2c;--titlebar-text:#c4c4c4;
-  --tab-active:#1e1e1e;--tab-inactive:#2d2d2d;
-  --win11-accent:#0067c0;
+  --bg:#0a0c0f;
+  --bg2:#0f1215;
+  --bg3:#141820;
+  --surface:#1a1f2e;
+  --surface2:#222840;
+  --cyan:#00d4ff;
+  --cyan2:#00ffcc;
+  --cyan-dim:rgba(0,212,255,0.12);
+  --cyan-mid:rgba(0,212,255,0.25);
+  --text:#e8eaf0;
+  --text2:#8892a4;
+  --text3:#4a5568;
+  --border:rgba(0,212,255,0.15);
+  --border2:rgba(0,212,255,0.3);
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Syne',sans-serif;
+  --glow:0 0 20px rgba(0,212,255,0.2),0 0 60px rgba(0,212,255,0.05);
 }
-html,body{height:100%;overflow:hidden;font-family:'Cascadia Code','Fira Code',monospace;background:#000}
-body{
-  background:
-    radial-gradient(ellipse 120% 80% at 60% 110%,rgba(0,103,192,0.18) 0%,transparent 55%),
-    radial-gradient(ellipse 80% 60% at 0% 0%,rgba(22,198,12,0.06) 0%,transparent 50%),
-    #141414;
-  display:flex;align-items:center;justify-content:center;
-}
-.wallpaper{
-  position:fixed;inset:0;z-index:0;
-  background-image:
-    linear-gradient(rgba(0,103,192,0.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,103,192,0.04) 1px,transparent 1px);
-  background-size:60px 60px;
-}
-.scanlines{
-  position:fixed;inset:0;z-index:500;pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px);
-}
-.wt-window{
-  position:relative;z-index:200;
-  width:min(960px,99vw);height:min(640px,97vh);
-  display:flex;flex-direction:column;
-  background:var(--acrylic);
-  backdrop-filter:blur(40px) saturate(180%) brightness(0.9);
-  -webkit-backdrop-filter:blur(40px) saturate(180%) brightness(0.9);
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:8px;
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,0.5),
-    0 32px 64px rgba(0,0,0,0.8),
-    0 8px 32px rgba(0,0,0,0.6),
-    inset 0 1px 0 rgba(255,255,255,0.06);
-  overflow:hidden;
-}
-.titlebar{
-  height:36px;background:var(--titlebar);
-  display:flex;align-items:stretch;flex-shrink:0;
-  user-select:none;border-bottom:1px solid rgba(0,0,0,0.4);
-}
-.titlebar-tabs{display:flex;align-items:stretch;flex:1;overflow:hidden}
-.tab{
-  display:flex;align-items:center;gap:8px;padding:0 16px;font-size:12px;color:#999;
-  border-right:1px solid rgba(0,0,0,0.3);cursor:default;white-space:nowrap;min-width:160px;
-  transition:background .15s;position:relative;
-}
-.tab.active{
-  background:var(--tab-active);color:var(--white);border-top:2px solid var(--win11-accent);
-}
-.tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:var(--tab-active);}
-.tab-icon{font-size:13px}
-.tab-close{
-  margin-left:auto;width:16px;height:16px;display:flex;align-items:center;justify-content:center;
-  border-radius:3px;font-size:10px;color:#666;
-}
-.tab-close:hover{background:rgba(255,255,255,0.1);color:#ccc}
-.tab-new{
-  width:36px;display:flex;align-items:center;justify-content:center;
-  color:#666;font-size:16px;cursor:pointer;flex-shrink:0;
-}
-.tab-new:hover{background:rgba(255,255,255,0.06);color:#ccc}
-.caption-btns{display:flex;align-items:stretch;flex-shrink:0}
-.cap-btn{
-  width:46px;display:flex;align-items:center;justify-content:center;
-  color:#999;font-size:10px;cursor:pointer;transition:background .1s;
-  border:none;background:transparent;font-family:'Cascadia Code',monospace;
-}
-.cap-btn:hover{background:rgba(255,255,255,0.08);color:#fff}
-.cap-btn.close:hover{background:#c42b1c;color:#fff}
-.cap-btn svg{width:10px;height:10px;fill:currentColor}
-.toolbar{
-  height:28px;background:rgba(0,0,0,0.25);
-  display:flex;align-items:center;padding:0 12px;gap:8px;
-  border-bottom:1px solid rgba(0,0,0,0.3);flex-shrink:0;
-}
-.toolbar-item{font-size:10px;color:#555;cursor:pointer;padding:2px 8px;border-radius:3px}
-.toolbar-item:hover{background:rgba(255,255,255,0.06);color:#999}
-.toolbar-spacer{flex:1}
-.pane-indicator{font-size:10px;color:#444;display:flex;align-items:center;gap:6px;}
-.pane-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 4px var(--green)}
-.pane{flex:1;display:flex;flex-direction:column;overflow:hidden;background:rgba(12,12,12,0.6)}
-.terminal{
-  flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 12px 4px;
-  font-size:13px;line-height:1.5;
-}
-.terminal::-webkit-scrollbar{width:6px}
-.terminal::-webkit-scrollbar-track{background:transparent}
-.terminal::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
-.terminal::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}
-.ln{color:var(--white);white-space:pre-wrap;word-break:break-all;line-height:1.5}
-.ln.g{color:var(--green);text-shadow:0 0 8px rgba(22,198,12,0.35)}
-.ln.gd{color:var(--green-dim)}
-.ln.b{color:var(--blue);text-shadow:0 0 6px rgba(59,120,255,0.3)}
-.ln.c{color:var(--cyan)}
-.ln.y{color:var(--yellow)}
-.ln.r{color:var(--red)}
-.ln.p{color:var(--purple)}
-.ln.d{color:var(--dim)}
-.ln.w{font-weight:600}
-.ln.ascii{color:var(--green);font-size:10.5px;line-height:1.2;text-shadow:0 0 10px rgba(22,198,12,0.45)}
-.prompt-echo{display:flex;align-items:baseline;gap:0;flex-wrap:wrap}
-.ps-user{color:var(--yellow)}
-.ps-at{color:var(--dim)}
-.ps-host{color:var(--cyan)}
-.ps-sep{color:var(--dim)}
-.ps-path{color:var(--blue)}
-.ps-gt{color:var(--white)}
-.ps-cmd{color:var(--white);margin-left:5px}
-.input-row{display:flex;align-items:center;padding:2px 12px 10px;flex-shrink:0;}
-.ps-live{display:flex;align-items:baseline;gap:0;font-size:13px;flex-shrink:0;white-space:nowrap}
-.cmd-input{
-  flex:1;background:transparent;border:none;outline:none;
-  color:var(--white);font-family:'Cascadia Code','Fira Code',monospace;font-size:13px;
-  caret-color:var(--white);margin-left:5px;line-height:1.5;
-}
-.cmd-input::selection{background:rgba(0,103,192,0.5)}
-.statusbar{
-  height:22px;background:var(--win11-accent);
-  display:flex;align-items:center;padding:0 12px;gap:16px;flex-shrink:0;
-}
-.sb-item{font-size:10px;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:5px;white-space:nowrap}
-.sb-item.right{margin-left:auto}
-.sb-sep{color:rgba(255,255,255,0.3);font-size:14px}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.fi{animation:fadeIn .15s ease-out forwards}
-@keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
-.dri{color:var(--cyan)}
-.fli{color:var(--white)}
-.exei{color:var(--green)}
-/* Autocomplete suggestion */
-.suggest{
-  position:absolute;bottom:38px;left:12px;
-  background:#1a1a2e;border:1px solid rgba(0,103,192,0.5);
-  border-radius:4px;padding:4px 0;min-width:200px;max-width:400px;
-  z-index:100;box-shadow:0 4px 16px rgba(0,0,0,0.6);
-}
-.suggest-item{
-  padding:3px 12px;font-size:12px;color:#aaa;cursor:pointer;white-space:nowrap;
-}
-.suggest-item.sel{background:rgba(0,103,192,0.4);color:#fff}
-.suggest-item:hover{background:rgba(255,255,255,0.06);color:#fff}
-@media(max-width:640px){
-  .wt-window{width:100vw;height:100dvh;border-radius:0;border:none}
-  .tab{min-width:120px}
-  .ln{font-size:11px}
-  .ln.ascii{font-size:8px}
-  .cmd-input,.ps-live{font-size:11px}
-  .toolbar{display:none}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;line-height:1.6}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;background:rgba(10,12,15,0.7);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--mono);font-size:.75rem;color:var(--cyan);letter-spacing:.15em;text-transform:uppercase}
+.nav-logo span{color:var(--text2)}
+.nav-links{display:flex;gap:2rem}
+.nav-links a{font-family:var(--mono);font-size:.7rem;color:var(--text2);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;transition:color .3s,text-shadow .3s}
+.nav-links a:hover{color:var(--cyan);text-shadow:0 0 10px rgba(0,212,255,0.5)}
+.nav-status{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.65rem;color:var(--text3)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan2);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 6px var(--cyan2)}50%{opacity:.4;box-shadow:none}}
+
+/* SECTIONS */
+section{padding:6rem 2rem;max-width:1100px;margin:0 auto}
+
+/* HERO */
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:6rem;position:relative;max-width:100%;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1100px;margin:0 auto;padding:0 2rem}
+.hero-eyebrow{font-family:var(--mono);font-size:.7rem;color:var(--cyan);letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem}
+.hero-eyebrow::before{content:'';display:inline-block;width:40px;height:1px;background:var(--cyan)}
+.hero-name{font-size:clamp(3rem,6vw,5.5rem);font-weight:800;line-height:1.05;letter-spacing:-.02em;margin-bottom:.5rem}
+.hero-name .accent{color:var(--cyan);display:block}
+.hero-title{font-family:var(--mono);font-size:.85rem;color:var(--text2);margin-bottom:2rem;padding-left:2px}
+.hero-desc{color:var(--text2);font-size:1rem;line-height:1.8;margin-bottom:2.5rem;max-width:480px}
+.hero-ctas{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-primary{font-family:var(--mono);font-size:.75rem;padding:.75rem 1.75rem;background:var(--cyan);color:#000;font-weight:700;letter-spacing:.1em;text-decoration:none;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));transition:box-shadow .3s,transform .2s}
+.btn-primary:hover{box-shadow:0 0 25px rgba(0,212,255,0.6);transform:translateY(-2px)}
+.btn-secondary{font-family:var(--mono);font-size:.75rem;padding:.75rem 1.75rem;background:transparent;color:var(--cyan);border:1px solid var(--border2);letter-spacing:.1em;text-decoration:none;text-transform:uppercase;transition:background .3s,box-shadow .3s}
+.btn-secondary:hover{background:var(--cyan-dim);box-shadow:0 0 15px rgba(0,212,255,0.2)}
+
+/* TERMINAL VISUAL */
+.terminal-container{position:relative}
+.terminal{background:var(--bg2);border:1px solid var(--border);border-radius:4px;overflow:hidden;box-shadow:var(--glow)}
+.terminal-bar{padding:.6rem 1rem;background:var(--surface);display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--border)}
+.t-dot{width:10px;height:10px;border-radius:50%}
+.t-dot.r{background:#ff5f56}.t-dot.y{background:#ffbd2e}.t-dot.g{background:#27c93f}
+.terminal-title{font-family:var(--mono);font-size:.65rem;color:var(--text3);flex:1;text-align:center;letter-spacing:.1em}
+.terminal-body{padding:1.5rem;font-family:var(--mono);font-size:.75rem;line-height:1.9;min-height:280px}
+.t-line{display:block}.t-prompt{color:var(--cyan2)}.t-cmd{color:var(--text)}.t-out{color:var(--text2)}.t-cyan{color:var(--cyan)}.t-err{color:#ff6b6b}
+.cursor{display:inline-block;width:8px;height:14px;background:var(--cyan);animation:blink 1.2s step-start infinite;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* SECTION HEADERS */
+.section-label{font-family:var(--mono);font-size:.65rem;color:var(--cyan);letter-spacing:.25em;text-transform:uppercase;margin-bottom:.75rem;display:flex;align-items:center;gap:.75rem}
+.section-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--cyan)}
+.section-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.1;margin-bottom:.75rem;letter-spacing:-.02em}
+.section-subtitle{color:var(--text2);font-size:.95rem;line-height:1.7;max-width:560px}
+
+/* TIMELINE */
+.timeline{margin-top:3rem;position:relative}
+.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--border2) 10%,var(--border2) 90%,transparent)}
+.timeline-item{display:grid;grid-template-columns:140px 1fr;gap:0;margin-bottom:0;position:relative}
+.timeline-item:not(:last-child) .t-content{padding-bottom:3rem}
+.t-year-col{padding-right:2.5rem;padding-top:.2rem;text-align:right;position:relative}
+.t-year{font-family:var(--mono);font-size:.75rem;color:var(--cyan);letter-spacing:.1em;font-weight:600}
+.t-node{position:absolute;right:-5px;top:.35rem;width:9px;height:9px;border-radius:50%;background:var(--bg);border:1.5px solid var(--cyan);transition:box-shadow .3s}
+.timeline-item:hover .t-node{box-shadow:0 0 12px var(--cyan)}
+.t-content{padding-left:2rem}
+.t-tag{font-family:var(--mono);font-size:.65rem;color:var(--cyan2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem}
+.t-milestone{font-size:1.05rem;font-weight:700;margin-bottom:.4rem}
+.t-desc{color:var(--text2);font-size:.875rem;line-height:1.75}
+.t-present .t-node{background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+.t-present .t-year{color:var(--cyan2)}
+
+/* SKILLS SPEC */
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;margin-top:3rem;background:var(--border);border:1px solid var(--border)}
+.spec-cell{background:var(--bg2);padding:1.75rem;transition:background .3s}
+.spec-cell:hover{background:var(--surface)}
+.spec-lang{font-family:var(--mono);font-size:.65rem;color:var(--cyan);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.4rem}
+.spec-name{font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
+.spec-desc{font-size:.8rem;color:var(--text2);line-height:1.7}
+.spec-bar-wrap{margin-top:1rem;height:2px;background:var(--surface2);position:relative}
+.spec-bar{height:100%;background:linear-gradient(to right,var(--cyan),var(--cyan2));position:relative}
+.spec-bar::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--cyan2);box-shadow:0 0 6px var(--cyan2)}
+
+/* GITHUB */
+.gh-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.gh-link{font-family:var(--mono);font-size:.7rem;color:var(--cyan);text-decoration:none;letter-spacing:.1em;display:flex;align-items:center;gap:.5rem;border:1px solid var(--border);padding:.4rem .9rem;transition:background .3s,box-shadow .3s}
+.gh-link:hover{background:var(--cyan-dim);box-shadow:0 0 12px rgba(0,212,255,.15)}
+.repos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:var(--border);border:1px solid var(--border)}
+.repo-card{background:var(--bg2);padding:1.5rem;transition:background .3s,box-shadow .3s;cursor:pointer;text-decoration:none;display:block;color:inherit}
+.repo-card:hover{background:var(--surface);box-shadow:inset 0 0 30px rgba(0,212,255,.03),0 0 20px rgba(0,212,255,.08)}
+.repo-name{font-family:var(--mono);font-size:.85rem;color:var(--cyan);font-weight:600;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+.repo-name svg{flex-shrink:0;opacity:.5}
+.repo-desc{font-size:.8rem;color:var(--text2);line-height:1.65;margin-bottom:1rem;min-height:2.5rem}
+.repo-meta{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.repo-lang{font-family:var(--mono);font-size:.65rem;color:var(--text2);display:flex;align-items:center;gap:.35rem}
+.lang-dot{width:8px;height:8px;border-radius:50%}
+.repo-stars{font-family:var(--mono);font-size:.65rem;color:var(--text3);display:flex;align-items:center;gap:.3rem}
+.repo-loading{text-align:center;padding:3rem;font-family:var(--mono);font-size:.8rem;color:var(--text3)}
+.repo-error{padding:2rem;text-align:center;font-family:var(--mono);font-size:.8rem;color:var(--text2)}
+
+/* CONTACT */
+.contact-wrap{background:var(--bg2);border:1px solid var(--border);padding:3rem;margin-top:3rem;position:relative;overflow:hidden}
+.contact-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--cyan),transparent)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+.contact-fact{margin-bottom:1.5rem}
+.contact-label{font-family:var(--mono);font-size:.65rem;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.25rem}
+.contact-value{font-family:var(--mono);font-size:.85rem;color:var(--cyan)}
+.contact-value a{color:inherit;text-decoration:none}
+.contact-value a:hover{text-decoration:underline}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:2rem;text-align:center;font-family:var(--mono);font-size:.65rem;color:var(--text3);letter-spacing:.1em}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{opacity:0;animation:fadeUp .7s ease forwards}
+.fade-in.d1{animation-delay:.1s}.fade-in.d2{animation-delay:.2s}.fade-in.d3{animation-delay:.3s}.fade-in.d4{animation-delay:.4s}.fade-in.d5{animation-delay:.5s}
+
+/* GRID NOISE */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.015) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+section,nav,footer,#hero{position:relative;z-index:1}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .hero-grid{grid-template-columns:1fr;gap:2.5rem}
+  .timeline-item{grid-template-columns:80px 1fr}
+  .contact-grid{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .spec-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
-<div class="wallpaper"></div>
-<div class="scanlines"></div>
 
-<div class="wt-window" id="wtWin">
-  <div class="titlebar">
-    <div class="titlebar-tabs">
-      <div class="tab active">
-        <span class="tab-icon">⊞</span>
-        <span>Windows PowerShell</span>
-        <span class="tab-close">✕</span>
-      </div>
-      <div class="tab" style="min-width:120px;font-size:11px;color:#555">
-        <span class="tab-icon" style="color:#555">⊞</span>
-        <span>Command Prompt</span>
-        <span class="tab-close">✕</span>
-      </div>
-      <div class="tab-new" title="New tab (Ctrl+Shift+T)">+</div>
-    </div>
-    <div class="caption-btns">
-      <button class="cap-btn" title="Help" onclick="runCmd('help')">
-        <svg viewBox="0 0 16 16"><path d="M8 5a3 3 0 100 6A3 3 0 008 5zm0 1a2 2 0 110 4A2 2 0 018 6zm0-5C4.134 1 1 4.134 1 8s3.134 7 7 7 7-3.134 7-7-3.134-7-7-7zm0 1a6 6 0 110 12A6 6 0 018 2z"/></svg>
-      </button>
-      <button class="cap-btn" title="Minimize" onclick="doMinimize()">
-        <svg viewBox="0 0 16 16"><rect x="2" y="8" width="12" height="1.5"/></svg>
-      </button>
-      <button class="cap-btn" title="Maximize/Restore" onclick="doMaximize()">
-        <svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="0" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-      </button>
-      <button class="cap-btn close" title="Close" onclick="doClose()">
-        <svg viewBox="0 0 16 16"><path d="M2.293 2.293a1 1 0 011.414 0L8 6.586l4.293-4.293a1 1 0 111.414 1.414L9.414 8l4.293 4.293a1 1 0 01-1.414 1.414L8 9.414l-4.293 4.293a1 1 0 01-1.414-1.414L6.586 8 2.293 3.707a1 1 0 010-1.414z"/></svg>
-      </button>
-    </div>
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">BD<span>://</span>portfolio</div>
+  <div class="nav-links">
+    <a href="#evolution">Timeline</a>
+    <a href="#skills">Skills</a>
+    <a href="#hub">GitHub</a>
+    <a href="#contact">Contact</a>
   </div>
+  <div class="nav-status"><div class="status-dot"></div>System Online</div>
+</nav>
 
-  <div class="toolbar">
-    <span class="toolbar-item">File</span>
-    <span class="toolbar-item">Edit</span>
-    <span class="toolbar-item">View</span>
-    <span class="toolbar-item">Settings</span>
-    <div class="toolbar-spacer"></div>
-    <div class="pane-indicator">
-      <span class="pane-dot"></span>
-      <span style="font-size:10px;color:#444">POWERSHELL 7.4 (x64)</span>
-    </div>
-  </div>
-
-  <div class="pane" style="position:relative">
-    <div class="terminal" id="terminal"></div>
-    <div id="suggestBox" class="suggest" style="display:none"></div>
-    <div class="input-row" id="inputRow" style="display:none">
-      <div class="ps-live" id="livePrompt">
-        <span class="ps-user">PS</span>
-        <span class="ps-sep">&nbsp;</span>
-        <span class="ps-path" id="cwdSpan">C:\Users\Baibhab</span>
-        <span class="ps-gt">&gt;</span>
+<!-- HERO -->
+<div id="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow fade-in d1">Linux Specialist &amp; Robotics Inventor</div>
+      <h1 class="hero-name fade-in d2">
+        Baibhab<span class="accent">Das</span>
+      </h1>
+      <p class="hero-title fade-in d2">~ $ uname -a → ElectroBAI Linux 6.x #AI-Robotics-Build</p>
+      <p class="hero-desc fade-in d3">Engineering the intersection of embedded systems, custom Linux distributions, and AI-driven robotics. From bare-metal circuits to intelligent machines.</p>
+      <div class="hero-ctas fade-in d4">
+        <a href="#hub" class="btn-primary">Engineering Hub</a>
+        <a href="#evolution" class="btn-secondary">View Timeline</a>
       </div>
-      <input class="cmd-input" id="cmdInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
-  </div>
-
-  <div class="statusbar">
-    <div class="sb-item"><span>⊞ POWERSHELL</span></div>
-    <div class="sb-sep">|</div>
-    <div class="sb-item" id="sbCpu">CPU 0.0%</div>
-    <div class="sb-sep">|</div>
-    <div class="sb-item" id="sbMem">RAM 0 MB</div>
-    <div class="sb-sep">|</div>
-    <div class="sb-item">UTF-8</div>
-    <div class="sb-sep">|</div>
-    <div class="sb-item">CRLF</div>
-    <div class="sb-item right" id="sbClock"></div>
+    <div class="terminal-container fade-in d3">
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+          <span class="terminal-title">baibhab@electrobai:~</span>
+        </div>
+        <div class="terminal-body">
+          <span class="t-line"><span class="t-prompt">electroBAI@linux</span><span class="t-cmd">:~$ whoami</span></span>
+          <span class="t-line t-cyan" style="padding-left:.5rem">Baibhab Das — Systems Architect</span>
+          <span class="t-line" style="margin-top:.5rem"><span class="t-prompt">electroBAI@linux</span><span class="t-cmd">:~$ cat skills.txt</span></span>
+          <span class="t-line t-out" style="padding-left:.5rem">→ Linux Kernel Development</span>
+          <span class="t-line t-out" style="padding-left:.5rem">→ Arduino / Embedded C</span>
+          <span class="t-line t-out" style="padding-left:.5rem">→ Assembly Language (x86/ARM)</span>
+          <span class="t-line t-out" style="padding-left:.5rem">→ Robotics + AI Integration</span>
+          <span class="t-line t-out" style="padding-left:.5rem">→ Custom Distro Engineering</span>
+          <span class="t-line" style="margin-top:.5rem"><span class="t-prompt">electroBAI@linux</span><span class="t-cmd">:~$ uptime</span></span>
+          <span class="t-line t-out" style="padding-left:.5rem">Active since 2021 · 5yr streak</span>
+          <span class="t-line" style="margin-top:.5rem"><span class="t-prompt">electroBAI@linux</span><span class="t-cmd">:~$ <span class="cursor"></span></span></span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
+<!-- TIMELINE -->
+<section id="evolution">
+  <div class="section-label">Module 02 — Chronological Record</div>
+  <h2 class="section-title">The Technical<br><span style="color:var(--cyan)">Evolution</span></h2>
+  <p class="section-subtitle">A living document of hardware discovery, systems mastery, and architectural ambition.</p>
+
+  <div class="timeline">
+
+    <div class="timeline-item">
+      <div class="t-year-col">
+        <div class="t-year">2021</div>
+        <div class="t-node"></div>
+      </div>
+      <div class="t-content">
+        <div class="t-tag">Genesis Protocol</div>
+        <div class="t-milestone">The First Circuit</div>
+        <p class="t-desc">An unexpected entry into the world of hardware — the successful completion of a first LED-battery circuit ignited a foundational passion for electronics and physical computing.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="t-year-col">
+        <div class="t-year">2022</div>
+        <div class="t-node"></div>
+      </div>
+      <div class="t-content">
+        <div class="t-tag">Logic Layer</div>
+        <div class="t-milestone">Analog &amp; Digital Fundamentals</div>
+        <p class="t-desc">Dedicated focus on the architecture of analog and digital systems — specializing in logic gate theory, Boolean algebra, and the foundational principles of circuit design.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="t-year-col">
+        <div class="t-year">2023</div>
+        <div class="t-node"></div>
+      </div>
+      <div class="t-content">
+        <div class="t-tag">Integration Phase</div>
+        <div class="t-milestone">Systems Depth</div>
+        <p class="t-desc">Advanced study into complex circuit dynamics, hardware-layer depth, and the systemic relationships between analog signal processing and digital control logic.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="t-year-col">
+        <div class="t-year">2024</div>
+        <div class="t-node"></div>
+      </div>
+      <div class="t-content">
+        <div class="t-tag">Embedded Systems</div>
+        <div class="t-milestone">The Microcontroller Pivot</div>
+        <p class="t-desc">A strategic transition into embedded systems — mastering Arduino ecosystem programming, AVR assembly, and initial explorations into Linux kernel environments and bare-metal code execution.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="t-year-col">
+        <div class="t-year">2025</div>
+        <div class="t-node"></div>
+      </div>
+      <div class="t-content">
+        <div class="t-tag">Distribution Engineering</div>
+        <div class="t-milestone">Custom Linux Distro</div>
+        <p class="t-desc">Scaling into Single Board Computers and advanced microarchitectures. Successfully developed a custom Linux distribution — owning the full stack from bootloader to userspace configuration.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item t-present">
+      <div class="t-year-col">
+        <div class="t-year">2026</div>
+        <div class="t-node"></div>
+      </div>
+      <div class="t-content">
+        <div class="t-tag" style="color:var(--cyan)">/// Present State</div>
+        <div class="t-milestone" style="color:var(--cyan)">AI × Robotics Interface</div>
+        <p class="t-desc">Current focus: interfacing robotics hardware with AI-driven decision logic. Refining high-performance Linux environments for real-time embedded computation and autonomous systems.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-label">Module 03 — Technical Specification</div>
+  <h2 class="section-title">Core<br><span style="color:var(--cyan)">Competencies</span></h2>
+  <p class="section-subtitle">A precision spec sheet — the technical vocabulary of an embedded systems architect.</p>
+
+  <div class="spec-grid">
+    <div class="spec-cell">
+      <div class="spec-lang">Language / ASM</div>
+      <div class="spec-name">Assembly</div>
+      <p class="spec-desc">x86 &amp; AVR architecture. Direct register manipulation, interrupt service routines, memory-mapped I/O. The language closest to the machine.</p>
+      <div class="spec-bar-wrap"><div class="spec-bar" style="width:88%"></div></div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-lang">Language / C#</div>
+      <div class="spec-name">C# &amp; .NET</div>
+      <p class="spec-desc">High-level application logic, serial communication with hardware, GUI tooling for embedded device management and data visualization pipelines.</p>
+      <div class="spec-bar-wrap"><div class="spec-bar" style="width:75%"></div></div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-lang">Language / Python</div>
+      <div class="spec-name">Python &amp; Bash</div>
+      <p class="spec-desc">Automation scripting, GPIO control via RPi libraries, system-level orchestration, and shell scripting for Linux distro build pipelines.</p>
+      <div class="spec-bar-wrap"><div class="spec-bar" style="width:82%"></div></div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-lang">Platform / Linux</div>
+      <div class="spec-name">Linux Kernel &amp; Distros</div>
+      <p class="spec-desc">Custom distribution engineering, kernel module development, systemd service architecture, cross-compilation toolchains for ARM/x86 targets.</p>
+      <div class="spec-bar-wrap"><div class="spec-bar" style="width:90%"></div></div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-lang">Hardware / MCU</div>
+      <div class="spec-name">Arduino / Embedded C</div>
+      <p class="spec-desc">AVR &amp; ARM microcontroller programming, peripheral interfacing (SPI, I2C, UART), real-time control loops, and power management circuits.</p>
+      <div class="spec-bar-wrap"><div class="spec-bar" style="width:85%"></div></div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-lang">Domain / AI+Robotics</div>
+      <div class="spec-name">Robotics &amp; AI Logic</div>
+      <p class="spec-desc">Sensor fusion, kinematics, integration of ML inference engines onto embedded Linux platforms. Bridging physical actuation with intelligent decision-making.</p>
+      <div class="spec-bar-wrap"><div class="spec-bar" style="width:70%"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- GITHUB HUB -->
+<section id="hub">
+  <div class="gh-header">
+    <div>
+      <div class="section-label">Module 04 — Engineering Hub</div>
+      <h2 class="section-title">GitHub<br><span style="color:var(--cyan)">Repositories</span></h2>
+    </div>
+    <a href="https://github.com/ElectroBAI" target="_blank" class="gh-link">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      @ElectroBAI ↗
+    </a>
+  </div>
+  <div id="repos-container">
+    <div class="repo-loading">
+      <span style="color:var(--cyan)">$</span> Fetching repositories from ElectroBAI/<span class="cursor" style="width:6px;height:12px"></span>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label">Module 05 — Signal Uplink</div>
+  <h2 class="section-title">Open<br><span style="color:var(--cyan)">Channel</span></h2>
+  <div class="contact-wrap">
+    <div class="contact-grid">
+      <div>
+        <p style="color:var(--text2);line-height:1.8;margin-bottom:2rem;font-size:.95rem">Interested in embedded systems collaboration, Linux distribution projects, or AI-robotics research? Let's build something that runs bare-metal.</p>
+        <div class="contact-fact">
+          <div class="contact-label">GitHub</div>
+          <div class="contact-value"><a href="https://github.com/ElectroBAI" target="_blank">github.com/ElectroBAI</a></div>
+        </div>
+        <div class="contact-fact">
+          <div class="contact-label">Specialization</div>
+          <div class="contact-value">Linux · Embedded · Robotics · AI</div>
+        </div>
+        <div class="contact-fact">
+          <div class="contact-label">Status</div>
+          <div class="contact-value" style="color:var(--cyan2)"><span class="status-dot" style="display:inline-block;margin-right:.5rem"></span>Available for collaboration</div>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;font-family:var(--mono);font-size:.75rem;line-height:2">
+          <div style="color:var(--text3);margin-bottom:.5rem"># system.profile</div>
+          <div><span style="color:var(--cyan2)">role</span><span style="color:var(--text3)">:</span> <span style="color:var(--text)">Student</span></div>
+          <div><span style="color:var(--cyan2)">exp</span><span style="color:var(--text3)">:</span> <span style="color:var(--text)">5+ years hardware ↔ software</span></div>
+          <div><span style="color:var(--cyan2)">focus</span><span style="color:var(--text3)">:</span> <span style="color:var(--text)">AI × Embedded Systems</span></div>
+          <div><span style="color:var(--cyan2)">arch</span><span style="color:var(--text3)">:</span> <span style="color:var(--text)">x86 · ARM · AVR · RISC-V</span></div>
+          <div><span style="color:var(--cyan2)">kernel</span><span style="color:var(--text3)">:</span> <span style="color:var(--text)">6.x custom build</span></div>
+          <div><span style="color:var(--cyan2)">status</span><span style="color:var(--text3)">:</span> <span style="color:var(--cyan2)">ONLINE</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p style="margin-bottom:.4rem">Baibhab Das · ElectroBAI · Linux Specialist &amp; Robotics Inventor</p>
+  <p style="opacity:.5">Built with precision · Running on passion · Kernel: custom-6.x</p>
+</footer>
+
 <script>
-const term    = document.getElementById('terminal');
-const inp     = document.getElementById('cmdInput');
-const inpRow  = document.getElementById('inputRow');
-const cwdSpan = document.getElementById('cwdSpan');
-const sugBox  = document.getElementById('suggestBox');
-
-let hist=[], hidx=-1, booting=true, soundOn=false, maximized=false;
-let sugItems=[], sugIdx=-1;
-
-// ── File System ──────────────────────────────────────────────────────
-const ROOT = 'C:\\Users\\Baibhab';
-let cwd = ROOT;
-
-// Every folder must have an FS entry with its children listed
-const FS = {
-  [ROOT]:                                   {type:'dir', children:['projects','skills','archives','contact','Desktop']},
-  [ROOT+'\\projects']:                       {type:'dir', children:['robotics-arm','linux-optimizer','hardware-mods','README.md']},
-  [ROOT+'\\projects\\robotics-arm']:         {type:'dir', children:['overview.md','code-snippets.md','components.txt']},
-  [ROOT+'\\projects\\linux-optimizer']:      {type:'dir', children:['overview.md','benchmarks.txt','patches.md']},
-  [ROOT+'\\projects\\hardware-mods']:        {type:'dir', children:['overview.md','mod-log.txt']},
-  [ROOT+'\\skills']:                         {type:'dir', children:['skills.md','certifications.md']},
-  [ROOT+'\\archives']:                       {type:'dir', children:['2022-batch','2023-projects','notes.txt']},
-  [ROOT+'\\archives\\2022-batch']:           {type:'dir', children:['early-arduino.md','first-robot.md']},
-  [ROOT+'\\archives\\2023-projects']:        {type:'dir', children:['ros-experiments.md','kernel-notes.md']},
-  [ROOT+'\\contact']:                        {type:'dir', children:['email.txt','github.txt','resume.txt']},
-  [ROOT+'\\Desktop']:                        {type:'dir', children:['portfolio-shortcut.lnk','README.lnk']},
+const LANG_COLORS={
+  'Assembly':'#6E4C13','C#':'#178600','Python':'#3572A5','Bash':'#89e051',
+  'C':'#555555','C++':'#f34b7d','JavaScript':'#f1e05a','HTML':'#e34c26',
+  'Makefile':'#427819','Shell':'#89e051'
 };
 
-function cwdShort(p){ return p; }
-
-// ── Audio ────────────────────────────────────────────────────────────
-let AC;
-function ensureAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)()}
-function playClick(){
-  if(!soundOn)return; ensureAC();
-  const o=AC.createOscillator(),g=AC.createGain();
-  o.connect(g);g.connect(AC.destination);
-  o.type='square';o.frequency.value=600+Math.random()*300;
-  g.gain.setValueAtTime(0.03,AC.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.035);
-  o.start();o.stop(AC.currentTime+0.035);
-}
-function playStartup(){
-  ensureAC();
-  [[523,0],[659,0.1],[784,0.2],[1047,0.32]].forEach(([f,t])=>{
-    const o=AC.createOscillator(),g=AC.createGain();
-    o.connect(g);g.connect(AC.destination);
-    o.frequency.value=f;o.type='sine';
-    const s=AC.currentTime+t;
-    g.gain.setValueAtTime(0,s);
-    g.gain.linearRampToValueAtTime(0.05,s+0.05);
-    g.gain.exponentialRampToValueAtTime(0.001,s+0.22);
-    o.start(s);o.stop(s+0.22);
-  });
-}
-
-// ── DOM helpers ──────────────────────────────────────────────────────
-function addLine(txt,cls='',delay=0){
-  return new Promise(r=>setTimeout(()=>{
-    const d=document.createElement('div');
-    d.className='ln fi'+(cls?' '+cls:'');
-    d.textContent=txt;
-    term.appendChild(d);
-    term.scrollTop=term.scrollHeight;
-    r();
-  },delay));
-}
-function addHTML(html,cls='',delay=0){
-  return new Promise(r=>setTimeout(()=>{
-    const d=document.createElement('div');
-    d.className='ln fi'+(cls?' '+cls:'');
-    d.innerHTML=html;
-    term.appendChild(d);
-    term.scrollTop=term.scrollHeight;
-    r();
-  },delay));
-}
-function addBlank(delay=0){return addLine('','d',delay)}
-
-function echoPrompt(cmd){
-  const d=document.createElement('div');
-  d.className='prompt-echo fi';
-  d.innerHTML=`<span class="ps-user">PS</span> <span class="ps-path">${esc(cwdShort(cwd))}</span><span class="ps-gt">&gt;</span><span class="ps-cmd">${esc(cmd)}</span>`;
-  term.appendChild(d);
-  term.scrollTop=term.scrollHeight;
-}
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-
-function renderLines(lines){
-  lines.forEach(([t,c])=>{
-    if(c==='__html') addHTML(t);
-    else addLine(t,c||'');
-  });
-  term.scrollTop=term.scrollHeight;
-}
-
-// ── File Content Database ────────────────────────────────────────────
-const CAT={
-
-  // ── Skills ──
-  'skills.md':()=>[
-    ['','d'],
-    ['    # Skills.md — Technical Proficiency Matrix','g w'],
-    ['    ═══════════════════════════════════════════════════════════','gd'],
-    ['    Skill              Bar                    Level   Domain','d'],
-    ['    ───────────────────────────────────────────────────────────','d'],
-    ...([
-      ['Python 3',   90,'██████████████████░░','Expert',   'Scripting, automation, pipelines'],
-      ['Linux Shell',95,'███████████████████░','Expert',   'Bash, Zsh, systemd, kernel'],
-      ['C / C++',    75,'███████████████░░░░░','Advanced', 'Embedded, Arduino firmware'],
-      ['C#',         65,'█████████████░░░░░░░','Mid',      '.NET desktop utilities'],
-      ['HTML/CSS',   80,'████████████████░░░░','Advanced', 'Web, terminal UIs'],
-      ['Arduino',    88,'█████████████████░░░','Expert',   'Sensors, motor control'],
-      ['ROS',        70,'██████████████░░░░░░','Mid',      'Robot OS, nodes, topics'],
-      ['Git',        85,'█████████████████░░░','Advanced', 'Version control, CI'],
-    ].map(([n,p,b,l,d])=>[`    ${n.padEnd(18)} [${b}] ${String(p).padStart(3)}%  ${l.padEnd(9)} ${d}`,''])),
-    ['    ───────────────────────────────────────────────────────────','d'],
-    ['','d'],
-    ['    Focus: robotics | linux-kernel | embedded | systems-engineering','c'],
-    ['','d'],
-  ],
-
-  'certifications.md':()=>[
-    ['','d'],
-    ['    # Certifications','g w'],
-    ['    ─────────────────────────────────────────────','d'],
-    ['    [PASS] Linux Fundamentals    LFS101x  (edX)','g'],
-    ['    [PASS] Arduino & Embedded C  Project-based','g'],
-    ['    [PASS] ROS Basics            Robotics coursework','g'],
-    ['    [PASS] Python for Engineers  Self-directed + coursework','g'],
-    ['    [----] CompTIA Linux+        In progress...','y'],
-    ['','d'],
-  ],
-
-  // ── Projects: robotics-arm ──
-  'overview.md':()=>{
-    // Context-sensitive based on cwd
-    if(cwd.includes('robotics-arm')) return [
-      ['','d'],
-      ['    # Project: 6-DOF Robotic Arm','g w'],
-      ['    ─────────────────────────────────────────────────────────','gd'],
-      ['    Status   : ● Active Development','g'],
-      ['    Language : C++ / Python / ROS Noetic',''],
-      ['    Hardware : Arduino Mega 2560 + custom PCB',''],
-      ['    Duration : Jan 2023 – Present','d'],
-      ['','d'],
-      ['    ## Overview','y'],
-      ['    A 6 degree-of-freedom robotic arm built from scratch.',''],
-      ['    Servo control via Arduino, kinematics solved in Python,',''],
-      ['    ROS nodes for real-time trajectory planning.',''],
-      ['','d'],
-      ['    ## Key Features','y'],
-      ['    ● Inverse kinematics solver (custom Python impl)','c'],
-      ['    ● PID-tuned servo control per joint','c'],
-      ['    ● ROS topic pub/sub for live telemetry','c'],
-      ['    ● Serial bridge: Python ↔ Arduino at 115200 baud','c'],
-      ['    ● URDF model for RViz visualization','c'],
-      ['','d'],
-      ['    ## Challenges Solved','y'],
-      ['    ● Gimbal lock prevention via quaternion math','d'],
-      ['    ● Servo jitter: hardware PWM + capacitor filters','d'],
-      ['    ● Heat management on continuous-duty joints','d'],
-      ['','d'],
-      ['    Run: cat components.txt  |  cat code-snippets.md','gd'],
-      ['','d'],
-    ];
-    if(cwd.includes('linux-optimizer')) return [
-      ['','d'],
-      ['    # Project: Linux Kernel Optimizer','g w'],
-      ['    ─────────────────────────────────────────────────────────','gd'],
-      ['    Status   : ● Ongoing / Maintained','g'],
-      ['    Language : Bash / Python / C (kernel patches)',''],
-      ['    Target   : Arch Linux, Ubuntu 22.04+, Debian',''],
-      ['    Duration : Jul 2022 – Present','d'],
-      ['','d'],
-      ['    ## Overview','y'],
-      ['    A personal toolkit of scripts and kernel patches for',''],
-      ['    squeezing maximum performance from Linux workstations.',''],
-      ['    Includes CPU governor tuning, IRQ affinity, and I/O',''],
-      ['    scheduler optimization.',''],
-      ['','d'],
-      ['    ## Components','y'],
-      ['    ● cpu-tune.sh   — Sets governor, disables C-states','c'],
-      ['    ● irq-pin.py    — Pins IRQs to isolated cores','c'],
-      ['    ● io-sched.sh   — Switches scheduler (mq-deadline/kyber)','c'],
-      ['    ● mem-huge.sh   — Enables transparent huge pages','c'],
-      ['    ● thermal-mon   — Real-time thermal monitoring daemon','c'],
-      ['','d'],
-      ['    ## Results (Workstation Benchmarks)','y'],
-      ['    ● Compile time (Linux kernel): -18% vs stock','g'],
-      ['    ● Disk I/O (fio): +34% sequential read','g'],
-      ['    ● Latency (cyclictest): 42μs → 11μs (RT patch)','g'],
-      ['','d'],
-      ['    Run: cat benchmarks.txt  |  cat patches.md','gd'],
-      ['','d'],
-    ];
-    if(cwd.includes('hardware-mods')) return [
-      ['','d'],
-      ['    # Project: Hardware Modifications','g w'],
-      ['    ─────────────────────────────────────────────────────────','gd'],
-      ['    Status   : ● Ongoing hobby / R&D','g'],
-      ['    Domain   : PCB design, thermal, overclocking, firmware',''],
-      ['    Tools    : KiCad, soldering station, oscilloscope',''],
-      ['','d'],
-      ['    ## Completed Mods','y'],
-      ['    ● Custom PCB for robotics arm power distribution','c'],
-      ['    ● Workstation delidding + Thermal Grizzly Conductonaut','c'],
-      ['    ● Custom fan curves via embedded microcontroller','c'],
-      ['    ● USB-C PD negotiation board (STM32 + FUSB302)','c'],
-      ['    ● 3D-printed enclosures with parametric OpenSCAD models','c'],
-      ['','d'],
-      ['    ## Tools & Skills','y'],
-      ['    ● KiCad 7 — schematic + PCB layout','d'],
-      ['    ● SMD soldering (0402 components)','d'],
-      ['    ● Logic analyser + oscilloscope debugging','d'],
-      ['    ● Firmware: bare-metal C on STM32 / AVR','d'],
-      ['','d'],
-      ['    Run: cat mod-log.txt','gd'],
-      ['','d'],
-    ];
-    // archives subdirs
-    if(cwd.includes('2022-batch')||cwd.includes('2023-projects')) return [
-      ['','d'],['    (archive overview — use cat <file> for details)','d'],['','d'],
-    ];
-    return [['','d'],['    (No overview available here)','d'],['','d']];
-  },
-
-  'code-snippets.md':()=>[
-    ['','d'],
-    ['    # Robotics Arm — Code Snippets','g w'],
-    ['    ─────────────────────────────────────────────────────────','gd'],
-    ['    ## IK Solver (Python excerpt)','y'],
-    ['    ─────────────────────────────────────────────────────────','d'],
-    ['    def solve_ik(target_pos, link_lengths):','b'],
-    ['        """Geometric IK for 3-DOF planar subchain"""','d'],
-    ['        x, y, z = target_pos','b'],
-    ['        l1, l2, l3 = link_lengths','b'],
-    ['        r = math.sqrt(x**2 + z**2)','b'],
-    ['        # Law of cosines for elbow angle','d'],
-    ['        cos_q2 = (r**2 + y**2 - l1**2 - l2**2)','b'],
-    ['                 / (2 * l1 * l2)','b'],
-    ['        q2 = math.atan2(math.sqrt(1-cos_q2**2), cos_q2)','b'],
-    ['        return [q1, q2, q3]  # joint angles (rad)','b'],
-    ['','d'],
-    ['    ## Arduino Serial Handler (C++)','y'],
-    ['    ─────────────────────────────────────────────────────────','d'],
-    ['    void parseCommand(String cmd) {','b'],
-    ['      int angles[6];','b'],
-    ['      sscanf(cmd.c_str(), "%d,%d,%d,%d,%d,%d",','b'],
-    ['             &angles[0],&angles[1],&angles[2],','b'],
-    ['             &angles[3],&angles[4],&angles[5]);','b'],
-    ['      for(int i=0;i<6;i++)','b'],
-    ['        servos[i].write(constrain(angles[i],0,180));','b'],
-    ['    }','b'],
-    ['','d'],
-  ],
-
-  'components.txt':()=>[
-    ['','d'],
-    ['    # Bill of Materials — 6-DOF Arm','g w'],
-    ['    ─────────────────────────────────────────────','d'],
-    ['    Qty  Component              Spec','d'],
-    ['    ───────────────────────────────────────────────','d'],
-    ['     6×  MG996R Servo           180° / 10 kg·cm',''],
-    ['     1×  Arduino Mega 2560      ATmega2560',''],
-    ['     1×  Custom Power PCB       5V/3A + 6V/5A rails',''],
-    ['     1×  Raspberry Pi 5         ROS compute node',''],
-    ['     1×  USB-Serial TTL         CH340G, 115200 baud',''],
-    ['     6×  Aluminium brackets     custom CNC',''],
-    ['     1×  12V 10A PSU            regulated',''],
-    ['     6×  100μF cap              servo decoupling',''],
-    ['    ───────────────────────────────────────────────','d'],
-    ['    Total BOM cost: ~₹4,200','y'],
-    ['','d'],
-  ],
-
-  // ── Projects: linux-optimizer ──
-  'benchmarks.txt':()=>[
-    ['','d'],
-    ['    # linux-optimizer — Benchmark Results','g w'],
-    ['    ══════════════════════════════════════════════════════','gd'],
-    ['    Test             Stock       Tuned      Delta','d'],
-    ['    ──────────────────────────────────────────────────────','d'],
-    ['    Kernel compile   14m 22s     11m 44s    -18.4%  ↑↑','g'],
-    ['    fio seq read     1.2 GB/s    1.6 GB/s   +33.3%  ↑↑','g'],
-    ['    fio seq write    980 MB/s    1.1 GB/s   +12.2%  ↑','g'],
-    ['    cyclictest lat   42 μs       11 μs      -73.8%  ↑↑','g'],
-    ['    sysbench CPU     18,420      19,871     +7.9%   ↑','g'],
-    ['    Boot time        14.2s       9.8s       -31.0%  ↑↑','g'],
-    ['    ──────────────────────────────────────────────────────','d'],
-    ['    System: Arch Linux · kernel 6.8.0-rt · AMD Ryzen 7','d'],
-    ['','d'],
-  ],
-
-  'patches.md':()=>[
-    ['','d'],
-    ['    # Kernel Patches Applied','g w'],
-    ['    ──────────────────────────────────────────────────────','d'],
-    ['    [APPLIED] PREEMPT_RT v6.8 real-time patch','g'],
-    ['    [APPLIED] BFQ I/O scheduler (default for HDD)','g'],
-    ['    [APPLIED] Kyber I/O scheduler (NVMe)','g'],
-    ['    [APPLIED] USB-C sleep regression fix (6.8.2)','g'],
-    ['    [APPLIED] AMD P-state EPP tuning','g'],
-    ['    [PENDING] NTSYNC futex patch (kernel 6.10)','y'],
-    ['    [TESTING] Zen4 cache topology fix','y'],
-    ['    ──────────────────────────────────────────────────────','d'],
-    ['','d'],
-    ['    All patches tracked in Git: github/baibhab-das/kernel-configs','d'],
-    ['','d'],
-  ],
-
-  // ── Projects: hardware-mods ──
-  'mod-log.txt':()=>[
-    ['','d'],
-    ['    # Hardware Mod Log','g w'],
-    ['    ──────────────────────────────────────────────────────','d'],
-    ['    2024-03-15  Delidded Ryzen 9 + Conductonaut  -12°C peak','g'],
-    ['    2024-02-08  USB-C PD board assembled & tested    OK','g'],
-    ['    2024-01-20  Robotics arm PCB v2 fabricated        OK','g'],
-    ['    2023-11-04  Custom fan controller fw v1.2          OK','g'],
-    ['    2023-09-17  3D printed arm housing (PLA+)          OK','g'],
-    ['    2023-07-02  SMD reflow: STM32 USB bridge           OK','g'],
-    ['    2023-04-11  First custom PCB — servo power board   OK','g'],
-    ['    ──────────────────────────────────────────────────────','d'],
-    ['','d'],
-  ],
-
-  // ── Archives ──
-  'early-arduino.md':()=>[
-    ['','d'],
-    ['    # Archive: Early Arduino Work (2022)','g w'],
-    ['    ──────────────────────────────────────────────────────','d'],
-    ['    ● Traffic light simulator (GPIO basics)','d'],
-    ['    ● Ultrasonic distance meter (HC-SR04)','d'],
-    ['    ● Line-follower robot (IR sensors + L298N)','d'],
-    ['    ● OLED weather display (DHT22 + SSD1306)','d'],
-    ['    ● Serial command parser (first serial comms)','d'],
-    ['','d'],
-    ['    These projects built the foundation for the 6-DOF arm.','d'],
-    ['','d'],
-  ],
-
-  'first-robot.md':()=>[
-    ['','d'],
-    ['    # Archive: First Robot (2022)','g w'],
-    ['    ──────────────────────────────────────────────────────','d'],
-    ['    A differential-drive bot with ultrasonic obstacle avoidance.',''],
-    ['    ● Platform  : Arduino Uno + L298N motor driver',''],
-    ['    ● Sensors   : HC-SR04 ultrasonic (front + side)',''],
-    ['    ● Behaviour : Wall-following + obstacle avoidance',''],
-    ['    ● Control   : Proportional steering correction',''],
-    ['','d'],
-    ['    Outcome: Competed in intra-college robotics challenge.','y'],
-    ['','d'],
-  ],
-
-  'ros-experiments.md':()=>[
-    ['','d'],
-    ['    # Archive: ROS Experiments (2023)','g w'],
-    ['    ──────────────────────────────────────────────────────','d'],
-    ['    ● Set up ROS Noetic on Ubuntu 20.04 VM','d'],
-    ['    ● Wrote first publisher/subscriber nodes (Python)','d'],
-    ['    ● Visualized arm URDF model in RViz','d'],
-    ['    ● Experimented with move_it! for path planning','d'],
-    ['    ● Bridged Arduino serial data to ROS topics','d'],
-    ['','d'],
-    ['    Laid the groundwork for the robotics-arm ROS integration.','d'],
-    ['','d'],
-  ],
-
-  'kernel-notes.md':()=>[
-    ['','d'],
-    ['    # Archive: Kernel Notes (2023)','g w'],
-    ['    ──────────────────────────────────────────────────────','d'],
-    ['    Early notes from first kernel compilation:','d'],
-    ['    ● Built vanilla 6.1 LTS from source','d'],
-    ['    ● Learned menuconfig, localmodconfig','d'],
-    ['    ● First PREEMPT_RT patch attempt (partial success)','d'],
-    ['    ● Studied scheduler source: kernel/sched/fair.c','d'],
-    ['    ● Wrote first kernel module (hello_world.ko)','d'],
-    ['','d'],
-  ],
-
-  // ── README ──
-  'README.md':()=>[
-    ['','d'],
-    ['    # Projects Directory — README','g w'],
-    ['    ──────────────────────────────────────────────────────','d'],
-    ['    Subdirectories:','d'],
-    ['      robotics-arm\\    6-DOF arm build (active)','c'],
-    ['      linux-optimizer\\ Kernel tuning toolkit (active)','c'],
-    ['      hardware-mods\\   PCB, thermal, firmware mods','c'],
-    ['','d'],
-    ['    Usage:','d'],
-    ['      cd robotics-arm    then ls    then cat overview.md','d'],
-    ['      cd linux-optimizer then ls    then cat overview.md','d'],
-    ['      cd hardware-mods   then ls    then cat overview.md','d'],
-    ['','d'],
-  ],
-
-  // ── Contact ──
-  'notes.txt':()=>[
-    ['','d'],['    // scratch notes','d'],
-    ['    kernel 6.8 patch: fix USB-C sleep regression',''],
-    ['    TODO: benchmark Thermal Grizzly Kryonaut on workstation','y'],
-    ['    servo jitter root cause: shared 5V rail — fixed with cap bank','d'],
-    ['','d'],
-  ],
-  'email.txt':()=>[['','d'],['    → Available via institutional channels or LinkedIn.','b'],['','d']],
-  'github.txt':()=>[['','d'],['    → Search: baibhab-das on GitHub','b'],['    → Repos: robotics-arm, kernel-configs, arduino-projects','d'],['','d']],
-  'resume.txt':()=>[['','d'],['    → Resume available on request.','y'],['    → Run "contact" for details.','d'],['','d']],
-  'portfolio-shortcut.lnk':()=>[['','d'],['    [Shortcut] → You are already here.','g'],['','d']],
-  'README.lnk':()=>[['','d'],['    [Shortcut] → Type "help" to get started.','g'],['','d']],
-};
-
-// ── Command map ──────────────────────────────────────────────────────
-const CMDS={
-  whoami:()=>[
-    ['','d'],
-    ['    ┌─────────────────────────────────────────────────────────┐','gd'],
-    ['    │  Identity Record                                        │','gd'],
-    ['    ├─────────────────────────────────────────────────────────┤','gd'],
-    ['    │  Name     : Baibhab Das                                 │',''],
-    ['    │  Origin   : Former Student, M.P. Birla Foundation       │',''],
-    ['    │  Focus    : Linux Optimization · Robotics · Hardware    │',''],
-    ['    │                                                         │','gd'],
-    ['    │  Transitioned from academic logic to specialized        │','d'],
-    ['    │  systems engineering. Currently working on Linux        │','d'],
-    ['    │  kernel tuning, 6-DOF robotics, and hardware mods.      │','d'],
-    ['    │                                                         │','gd'],
-    ['    │  Philosophy: Write code that respects the machine.      │','d'],
-    ['    └─────────────────────────────────────────────────────────┘','gd'],
-    ['','d'],
-  ],
-
-  help:()=>[
-    ['','d'],
-    ['    Windows Terminal Portfolio — Command Reference','g w'],
-    ['    ═══════════════════════════════════════════════════════════','gd'],
-    ['    Command          Alias      Description','d'],
-    ['    ───────────────────────────────────────────────────────────','d'],
-    ['    whoami                      Identity & biography',''],
-    ['    ls / dir                    List directory contents',''],
-    ['    cd <dir>                    Change directory (.. to go up)',''],
-    ['    cat <file>                  Read a file',''],
-    ['    projects                    Project overview (shortcut)',''],
-    ['    clear / cls                 Clear the terminal',''],
-    ['    neofetch                    System info splash',''],
-    ['    contact                     Contact details',''],
-    ['    history                     Command history',''],
-    ['    pwd                         Print working directory',''],
-    ['    sound                       Toggle keyboard click sounds',''],
-    ['    ver                         OS version info',''],
-    ['    systeminfo                  System information',''],
-    ['    ───────────────────────────────────────────────────────────','d'],
-    ['    ↑ / ↓  = history    Tab = autocomplete (cmds + files)','d'],
-    ['    Ctrl+L = clear       Ctrl+C = cancel input','d'],
-    ['','d'],
-  ],
-
-  projects:()=>[
-    ['','d'],
-    ['    ┌─ Projects Overview ────────────────────────────────────┐','gd'],
-    ['    │                                                        │','gd'],
-    ['    │  [1] robotics-arm      6-DOF arm with ROS + Arduino   │','c'],
-    ['    │      └─ IK solver, PID servos, URDF, serial bridge    │','d'],
-    ['    │                                                        │','gd'],
-    ['    │  [2] linux-optimizer   Kernel tuning toolkit          │','c'],
-    ['    │      └─ RT patches, scheduler, IRQ, benchmark -18%    │','d'],
-    ['    │                                                        │','gd'],
-    ['    │  [3] hardware-mods     PCB design + firmware + thermal│','c'],
-    ['    │      └─ KiCad, STM32, SMD, delidding, USB-C PD       │','d'],
-    ['    │                                                        │','gd'],
-    ['    │  Navigate: cd projects\\robotics-arm                   │','y'],
-    ['    │            then: cat overview.md                      │','y'],
-    ['    └────────────────────────────────────────────────────────┘','gd'],
-    ['','d'],
-  ],
-
-  contact:()=>[
-    ['','d'],
-    ['    ┌─ Contact ──────────────────────────────────────────────┐','gd'],
-    ['    │  Institution : M.P. Birla Foundation, Kolkata          │',''],
-    ['    │  Expertise   : Linux | Robotics | Hardware Engineering │',''],
-    ['    │  Open To     : Collaboration, projects, internships    │',''],
-    ['    │                                                        │','gd'],
-    ['    │  → cat contact\\email.txt                              │','b'],
-    ['    │  → cat contact\\github.txt                             │','b'],
-    ['    │  → cat contact\\resume.txt                             │','b'],
-    ['    └────────────────────────────────────────────────────────┘','gd'],
-    ['','d'],
-  ],
-
-  neofetch:()=>{
-    const up=Math.floor(performance.now()/1000);
-    const m=String(Math.floor(up/60)).padStart(2,'0'),s=String(up%60).padStart(2,'0');
-    return[
-      ['','d'],
-      ['          .-------.       baibhab@mpbirla-foundation','g w'],
-      ['         /  .-.   \\      ─────────────────────────────────────','gd'],
-      ["        | |  _  | |      OS:       Windows 11 Pro (WSL2 Arch)",''],
-      ["         \\ '--' /        Kernel:   6.8.0-rt-mpbirla-patched",''],
-      ["          \`-----\'        Shell:    PowerShell 7.4.0",''],
-      ['         /|     |\\       Terminal: Windows Terminal 1.21',''],
-      ['        / |     | \\      Uptime:   '+m+'m '+s+'s',''],
-      ['       /  |_____|  \\     CPU:      Focus Mode™ (RT-tuned)',''],
-      ['      /____|   |____\\    GPU:      Dedicated (modded VBIOS)',''],
-      ['                         Projects: 3 active, 2 archived',''],
-      ['                         Colors:   256 (phosphor theme)',''],
-      ['','d'],
-    ];
-  },
-
-  sudo:()=>[
-    ['','d'],
-    ['    sudo : The term "sudo" is not recognized as the name of a','r'],
-    ['    cmdlet, function, script file, or operable program.','r'],
-    ['    Did you mean: "runas" ?','y'],
-    ['','d'],
-    ['    ⚠  Access Denied. This incident has been reported.','r w'],
-    ['    Event logged → C:\\Windows\\System32\\winevt\\Security.evtx','d'],
-    ['','d'],
-  ],
-
-  history:()=>{
-    if(!hist.length) return[['    (No command history)','d'],['','d']];
-    const out=[['','d'],['      Id  CommandLine','d'],['      --  -----------','d']];
-    hist.slice().reverse().forEach((h,i)=>{
-      out.push([`     ${String(i+1).padStart(4,'0')}  ${h}`,'']);
+async function fetchRepos(){
+  const container=document.getElementById('repos-container');
+  try{
+    const r=await fetch('https://api.github.com/users/ElectroBAI/repos?sort=updated&per_page=12');
+    if(!r.ok)throw new Error('API error');
+    const repos=await r.json();
+    if(!repos.length){container.innerHTML='<div class="repo-error">No public repositories found.</div>';return;}
+    const grid=document.createElement('div');
+    grid.className='repos-grid';
+    repos.forEach(repo=>{
+      const lang=repo.language||'N/A';
+      const color=LANG_COLORS[lang]||'#8892a4';
+      const card=document.createElement('a');
+      card.className='repo-card';
+      card.href=repo.html_url;
+      card.target='_blank';
+      card.rel='noopener noreferrer';
+      card.innerHTML=`
+        <div class="repo-name">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"/></svg>
+          ${repo.name}
+        </div>
+        <p class="repo-desc">${repo.description||'No description provided.'}</p>
+        <div class="repo-meta">
+          <span class="repo-lang"><span class="lang-dot" style="background:${color}"></span>${lang}</span>
+          <span class="repo-stars">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"/></svg>
+            ${repo.stargazers_count}
+          </span>
+          ${repo.fork?'<span style="font-family:var(--mono);font-size:.6rem;color:var(--text3);border:1px solid var(--border);padding:.1rem .4rem">fork</span>':''}
+        </div>
+      `;
+      grid.appendChild(card);
     });
-    out.push(['','d']);
-    return out;
-  },
-
-  pwd:()=>[['    '+cwdShort(cwd),''],['','d']],
-  date:()=>[['    '+new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST',''],['','d']],
-  echo:(a)=>[['    '+a.join(' '),''],['','d']],
-
-  ver:()=>[
-    ['','d'],
-    ['    Microsoft Windows [Version 11.0.26100.3915]',''],
-    ['    (c) Microsoft Corporation. All rights reserved.','d'],
-    ['','d'],
-  ],
-
-  systeminfo:()=>[
-    ['','d'],
-    ['    Host Name         : MPBIRLA-WORKSTATION','g'],
-    ['    OS Name           : Microsoft Windows 11 Pro',''],
-    ['    OS Version        : 10.0.26100 Build 26100',''],
-    ['    System Type       : x64-based PC',''],
-    ['    Processor         : Custom-tuned (RT kernel, OC)',''],
-    ['    Total RAM         : 32,768 MB',''],
-    ['    Active Projects   : 3','c'],
-    ['    Domain            : mpbirla-foundation.local',''],
-    ['    Logon Server      : \\\\MPBIRLA-DC',''],
-    ['','d'],
-  ],
-
-  sound:()=>{
-    soundOn=!soundOn;
-    if(soundOn) ensureAC();
-    return[['','d'],[`    Keyboard sounds: ${soundOn?'● ENABLED':'○ DISABLED'}`,soundOn?'g':'d'],['','d']];
-  },
-};
-
-// ── Tab completion: commands + files in current dir ──────────────────
-const ALL_CMDS=['whoami','help','ls','dir','cd','cat','clear','cls','sudo','history',
-  'neofetch','contact','projects','sound','pwd','date','echo','ver','systeminfo',
-  'Get-ChildItem','Set-Location','Get-Content','Clear-Host'];
-
-function getCandidates(partial){
-  const p=partial.toLowerCase();
-  const parts=partial.split(/\s+/);
-
-  // If typing first word → complete commands
-  if(parts.length===1){
-    return ALL_CMDS.filter(c=>c.toLowerCase().startsWith(p)&&c.toLowerCase()!==p);
+    container.innerHTML='';
+    container.appendChild(grid);
+  }catch(e){
+    container.innerHTML=`<div class="repo-error">
+      <p style="color:var(--cyan);margin-bottom:.5rem">$ git remote show ElectroBAI</p>
+      <p>Unable to fetch live data — GitHub API rate limit or network error.</p>
+      <p style="margin-top:.75rem"><a href="https://github.com/ElectroBAI" target="_blank" style="color:var(--cyan)">→ View repositories directly on GitHub</a></p>
+    </div>`;
   }
-
-  // If typing argument to cd/cat/ls → complete filesystem entries
-  const cmd=parts[0].toLowerCase();
-  const arg=parts.slice(1).join(' ');
-  if(['cd','set-location','cat','get-content'].includes(cmd)){
-    const node=FS[cwd];
-    if(!node) return [];
-    const argLower=arg.toLowerCase();
-    return node.children
-      .filter(c=>c.toLowerCase().startsWith(argLower)&&c.toLowerCase()!==argLower)
-      .map(c=>parts[0]+' '+c);
-  }
-  return [];
 }
 
-// ── Suggest box ──────────────────────────────────────────────────────
-function showSuggest(items, partial){
-  sugItems=items; sugIdx=0;
-  sugBox.innerHTML='';
-  items.slice(0,8).forEach((item,i)=>{
-    const d=document.createElement('div');
-    d.className='suggest-item'+(i===0?' sel':'');
-    d.textContent=item;
-    d.onmousedown=(e)=>{e.preventDefault();inp.value=item;hideSuggest();inp.focus();};
-    sugBox.appendChild(d);
+fetchRepos();
+
+// Intersection observer for scroll animations
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.style.opacity='1';
+      e.target.style.transform='translateY(0)';
+    }
   });
-  sugBox.style.display=items.length?'block':'none';
-}
-function hideSuggest(){sugBox.style.display='none';sugItems=[];sugIdx=-1;}
-function moveSuggest(dir){
-  if(!sugItems.length) return;
-  sugIdx=Math.max(0,Math.min(sugItems.length-1,sugIdx+dir));
-  [...sugBox.children].forEach((el,i)=>{
-    el.classList.toggle('sel',i===sugIdx);
-  });
-  inp.value=sugItems[sugIdx];
-}
+},{threshold:.15});
 
-// ── Process command ──────────────────────────────────────────────────
-function runCmd(raw){
-  const tr=raw.trim();
-  hideSuggest();
-  if(!tr) return;
-  if(hist[0]!==tr) hist.unshift(tr);
-  if(hist.length>100) hist.pop();
-  hidx=-1;
-  playClick();
-  echoPrompt(tr);
-
-  const parts=tr.split(/\s+/);
-  const cmd=parts[0].toLowerCase();
-  const args=parts.slice(1);
-
-  if(cmd==='clear'||cmd==='cls'||cmd==='clear-host'){term.innerHTML='';return}
-
-  // ── ls / dir ──
-  if(cmd==='ls'||cmd==='dir'||cmd==='get-childitem'){
-    const node=FS[cwd];
-    const items=node?node.children:[];
-    addBlank();
-    if(!items.length){addLine('    (empty directory)','d');addBlank();return}
-    addLine(`    Directory: ${cwdShort(cwd)}`,'d');
-    addBlank();
-    addLine('    Mode                 LastWriteTime         Length Name','d');
-    addLine('    ----                 -------------         ------ ----','d');
-    const now=new Date();
-    const ds=now.toLocaleDateString('en-GB')+' '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    items.forEach(item=>{
-      const fullPath=cwd+'\\'+item;
-      const isDir=!!FS[fullPath];
-      const mode=isDir?'d----':'-----';
-      const cls=isDir?'dri':(item.endsWith('.md')||item.endsWith('.txt')?'fli':(item.endsWith('.lnk')?'p':'exei'));
-      const len=isDir?'':String(Math.floor(Math.random()*8000+500));
-      const d=document.createElement('div');
-      d.className='ln fi';
-      d.innerHTML=`    <span style="color:var(--dim)">${mode}  ${ds}  ${isDir?'     ':len.padStart(6)}</span> <span class="${cls}">${esc(item)}</span>`;
-      term.appendChild(d);
-    });
-    addBlank();
-    term.scrollTop=term.scrollHeight;
-    return;
-  }
-
-  // ── cd ──
-  if(cmd==='cd'||cmd==='set-location'){
-    const tgt=args[0];
-    if(!tgt||tgt==='~'||tgt==='%userprofile%'){
-      cwd=ROOT;cwdSpan.textContent=cwdShort(cwd);addBlank();return;
-    }
-    if(tgt==='..'||tgt==='..\\'){
-      const p=cwd.lastIndexOf('\\');
-      if(p>2){cwd=cwd.slice(0,p);cwdSpan.textContent=cwdShort(cwd);}
-      addBlank();return;
-    }
-    // Resolve: could be absolute or relative; strip trailing backslash
-    const cleaned=tgt.replace(/\\$/,'');
-    const full=cleaned.startsWith('C:\\')?cleaned:(cwd+'\\'+cleaned);
-    if(FS[full]){
-      cwd=full;cwdSpan.textContent=cwdShort(cwd);addBlank();
-    } else {
-      addLine(`    Set-Location: Cannot find path '${tgt}' because it does not exist.`,'r');
-      addBlank();
-    }
-    return;
-  }
-
-  // ── cat ──
-  if(cmd==='cat'||cmd==='get-content'){
-    if(!args[0]){addLine('    Usage: cat <filename>','y');addBlank();return}
-    // Strip any leading path, just use filename
-    const fname=args[0].replace(/^.*[\\\/]/,'');
-    if(CAT[fname]){renderLines(CAT[fname]());}
-    else{addLine(`    Get-Content: Cannot find path '${args[0]}': No such file.`,'r');addBlank();}
-    return;
-  }
-
-  if(CMDS[cmd]){renderLines(CMDS[cmd](args));return}
-
-  addLine(`    ${esc(parts[0])} : The term '${esc(parts[0])}' is not recognized as the name of a cmdlet,`,'r');
-  addLine(`    function, script file, or operable program. Check the spelling or type "help".`,'d');
-  addBlank();
-}
-
-// ── Boot sequence ────────────────────────────────────────────────────
-async function boot(){
-  const ascii=[
-    ' ██████╗  █████╗ ██╗██████╗ ██╗  ██╗ █████╗ ██████╗',
-    ' ██╔══██╗██╔══██╗██║██╔══██╗██║  ██║██╔══██╗██╔══██╗',
-    ' ██████╔╝███████║██║██████╔╝███████║███████║██████╔╝',
-    ' ██╔══██╗██╔══██║██║██╔══██╗██╔══██║██╔══██║██╔══██╗',
-    ' ██████╔╝██║  ██║██║██████╔╝██║  ██║██║  ██║██████╔╝',
-    ' ╚═════╝ ╚═╝  ╚═╝╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝',
-    '',
-    '         ██████╗  █████╗ ███████╗',
-    '         ██╔══██╗██╔══██╗██╔════╝',
-    '         ██║  ██║███████║███████╗',
-    '         ██║  ██║██╔══██║╚════██║',
-    '         ██████╔╝██║  ██║███████║',
-    '         ╚═════╝ ╚═╝  ╚═╝╚══════╝',
-  ];
-
-  const bootLines=[
-    ['    Windows PowerShell 7.4.0','',0],
-    ['    Copyright (c) Microsoft Corporation.','d',40],
-    ['','d',70],
-    ['    Loading profile: C:\\Users\\Baibhab\\Documents\\PowerShell\\Profile.ps1','d',100],
-    ['    Initializing modules...','d',150],
-    ['','d',185],
-    ['    Import-Module : PSReadLine 2.3.5       [OK]','gd',210],
-    ['    Import-Module : Terminal-Icons 0.11.0  [OK]','gd',260],
-    ['    Import-Module : posh-git 1.1.0         [OK]','gd',310],
-    ['    Import-Module : RoboticsCore 3.2.1     [OK]','gd',360],
-    ['','d',400],
-    ['    Connecting to hardware interfaces...','d',430],
-    ['    [CONNECTED] Arduino Mega 2560     COM3    115200 baud','y',470],
-    ['    [CONNECTED] Raspberry Pi 5        SSH     192.168.1.42','y',520],
-    ['    [CONNECTED] USB-Serial TTY        COM4    ready','y',565],
-    ['    [CONNECTED] Robotics Arm GPIO     SPI0    ready','y',610],
-    ['','d',650],
-    ['    Applying kernel optimizations... done','gd',680],
-    ['    All systems nominal. Welcome back, Baibhab.','g',730],
-    ['','d',780],
-    ['    ═══════════════════════════════════════════════════════════','gd',810],
-  ];
-
-  for(const [t,c,d] of bootLines) await addLine(t,c,d);
-
-  let ad=840;
-  for(const line of ascii){await addLine(line,'ascii',ad);ad+=18;}
-
-  const info=[
-    ['','d',ad+10],
-    ['    ═══════════════════════════════════════════════════════════','gd',ad+30],
-    ['    System Status  :  ● ONLINE','g w',ad+50],
-    ['    Authorized User:  Former Student of M.P. Birla Foundation','',ad+70],
-    ['    Expertise      :  Linux Systems | Robotics | Hardware Engineering','c',ad+90],
-    ['    Session Start  :  '+new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST','d',ad+110],
-    ['    ═══════════════════════════════════════════════════════════','gd',ad+130],
-    ['','d',ad+150],
-    ['    Type "help" for commands  |  "projects" for project list','gd',ad+170],
-    ['    Tab autocompletes commands AND filenames in current dir.','d',ad+190],
-    ['','d',ad+210],
-  ];
-  for(const [t,c,d] of info) await addLine(t,c,d);
-
-  setTimeout(()=>{
-    try{playStartup();}catch(e){}
-    inpRow.style.display='flex';
-    inp.focus();booting=false;
-  },ad+240);
-}
-
-// ── Status bar ───────────────────────────────────────────────────────
-const sbCpu=document.getElementById('sbCpu');
-const sbMem=document.getElementById('sbMem');
-const sbClk=document.getElementById('sbClock');
-setInterval(()=>{
-  sbCpu.textContent='CPU '+(Math.random()*6+0.5).toFixed(1)+'%';
-  sbMem.textContent='RAM '+(Math.random()*160+520).toFixed(0)+' MB';
-  sbClk.textContent=new Date().toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',second:'2-digit'})+' IST';
-},1000);
-
-// ── Input handling ───────────────────────────────────────────────────
-inp.addEventListener('input',()=>{
-  const v=inp.value;
-  if(!v.trim()){hideSuggest();return;}
-  const candidates=getCandidates(v);
-  if(candidates.length>1) showSuggest(candidates,v);
-  else hideSuggest();
+document.querySelectorAll('.timeline-item').forEach(el=>{
+  el.style.opacity='0';
+  el.style.transform='translateY(16px)';
+  el.style.transition='opacity .6s ease, transform .6s ease';
+  observer.observe(el);
 });
 
-inp.addEventListener('keydown',e=>{
-  // If suggest box open, navigate it
-  if(sugItems.length&&(e.key==='ArrowUp'||e.key==='ArrowDown')){
-    e.preventDefault();
-    moveSuggest(e.key==='ArrowDown'?1:-1);
-    return;
-  }
-  if(sugItems.length&&e.key==='Escape'){hideSuggest();return;}
-
-  if(e.key==='Enter'){
-    const v=inp.value;inp.value='';hideSuggest();runCmd(v);
-  }
-  else if(e.key==='ArrowUp'){
-    e.preventDefault();
-    if(hidx<hist.length-1){hidx++;inp.value=hist[hidx];}
-    requestAnimationFrame(()=>inp.setSelectionRange(inp.value.length,inp.value.length));
-  }
-  else if(e.key==='ArrowDown'){
-    e.preventDefault();
-    if(hidx>0){hidx--;inp.value=hist[hidx];}else{hidx=-1;inp.value='';}
-  }
-  else if(e.key==='Tab'){
-    e.preventDefault();
-    const v=inp.value;
-    const candidates=getCandidates(v);
-    if(candidates.length===1){
-      inp.value=candidates[0];hideSuggest();
-    } else if(candidates.length>1){
-      showSuggest(candidates,v);
-    }
-  }
-  else if(e.key==='l'&&e.ctrlKey){e.preventDefault();term.innerHTML='';}
-  else if(e.key==='c'&&e.ctrlKey){e.preventDefault();echoPrompt(inp.value+'^C');inp.value='';hideSuggest();}
-  playClick();
+document.querySelectorAll('.spec-cell').forEach((el,i)=>{
+  el.style.opacity='0';
+  el.style.transform='translateY(10px)';
+  el.style.transition=`opacity .5s ease ${i*.08}s, transform .5s ease ${i*.08}s`;
+  observer.observe(el);
 });
-
-// Hide suggest when clicking outside
-document.addEventListener('mousedown',(e)=>{
-  if(!sugBox.contains(e.target)&&e.target!==inp) hideSuggest();
-});
-
-document.addEventListener('click',()=>{if(!booting)inp.focus();});
-
-// ── Window controls ──────────────────────────────────────────────────
-function doMinimize(){
-  const w=document.getElementById('wtWin');
-  w.style.transition='transform .25s,opacity .25s';
-  w.style.transform='scale(0.92)';w.style.opacity='0.2';
-  setTimeout(()=>{w.style.transform='';w.style.opacity='1';inp.focus();},1000);
-}
-function doClose(){
-  const w=document.getElementById('wtWin');
-  w.style.transition='transform .2s,opacity .2s';
-  w.style.transform='scale(0.95)';w.style.opacity='0';
-  setTimeout(()=>{w.style.transform='scale(1)';w.style.opacity='1';},800);
-}
-function doMaximize(){
-  const w=document.getElementById('wtWin');
-  maximized=!maximized;
-  if(maximized){
-    w.style.width='100vw';w.style.height='100vh';
-    w.style.borderRadius='0';w.style.border='none';
-  } else {
-    w.style.width='';w.style.height='';
-    w.style.borderRadius='8px';w.style.border='';
-  }
-  inp.focus();
-}
-
-boot();
 </script>
 </body>
 </html>
